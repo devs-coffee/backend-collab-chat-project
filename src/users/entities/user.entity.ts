@@ -15,7 +15,7 @@ export class UserEntity implements User {
     email: string;
 
     @ApiProperty({ required: false, nullable: true})
-    picture: Buffer | null;
+    picture: string;
 
     @ApiProperty()
     createdAt: Date;

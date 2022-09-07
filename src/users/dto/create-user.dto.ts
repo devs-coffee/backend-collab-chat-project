@@ -12,5 +12,5 @@ export class CreateUserDto {
     email: string;
 
     @ApiProperty()
-    picture?: Buffer;
+    picture?: string;
 }
