@@ -1,4 +1,4 @@
-import { CreateUserDto } from "../users/dto/create-user.dto";
+import { CreateUserDto } from "../dtos/users/create-user.dto";
 import { User } from "@prisma/client";
 
 export class Mapper {

@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, Logger } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from '../dtos/users/create-user.dto';
+import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
 import { Mapper } from '../core/mapper';
