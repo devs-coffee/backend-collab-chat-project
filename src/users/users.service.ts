@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { SigninUserDto } from 'src/dtos/users/signin-user-dto';
 import { CreateUserDto } from '../dtos/users/create-user.dto';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -16,7 +17,11 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({ where: { id }});
+  }
+
+  findByEmail(signinUserDto: SigninUserDto) {
+    return this.prisma.user.findFirst({ where: {AND:[{email : signinUserDto.email }]  }});
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
