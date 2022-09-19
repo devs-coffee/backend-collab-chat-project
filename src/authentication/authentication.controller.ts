@@ -8,7 +8,6 @@ import { errorConstant } from '../constants/errors.constants';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
-import { UserEntity } from '../users/entities/user.entity';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -18,7 +17,7 @@ export class AuthenticationController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOkResponse({ type: LoginSignupResponse })
-  @ApiBadRequestResponse({ type : BadRequestException})
+  @ApiBadRequestResponse({ type : BadRequestException })
   async login(@Request() req) : Promise<OperationResult<LoginSignupResponse>> {
     const result = new OperationResult<LoginSignupResponse>();
     result.isSucceed = false;

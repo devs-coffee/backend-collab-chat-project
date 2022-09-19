@@ -1,6 +1,5 @@
 import { Controller, Get, Body, Patch, Param, Delete, BadRequestException, Logger } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from '../dtos/users/create-user.dto';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { ApiTags, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
@@ -8,6 +7,7 @@ import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { UserDto } from '../dtos/users/user.dto';
 import { UserEntity } from './entities/user.entity';
+import { errorConstant } from '../constants/errors.constants';
 
 @Controller('users')
 @ApiTags('users')
@@ -32,9 +32,8 @@ export class UsersController {
       return response;
     } catch (error) {
       Logger.log(error);
-      throw new BadRequestException("An error occured", error);
+      throw new BadRequestException(errorConstant.errorOccured);
     }
-
   }
 
   @Get(':id')
@@ -55,7 +54,7 @@ export class UsersController {
       return response;
     } catch (error) {
       Logger.log(error);
-      throw new BadRequestException("An error occured", error);
+      throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 
@@ -77,7 +76,7 @@ export class UsersController {
       return result;
     } catch (error) {
         Logger.log(error);
-        throw new BadRequestException("an error occured");
+        throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 
@@ -95,7 +94,7 @@ export class UsersController {
 
     } catch (error) {
       Logger.log(error);
-      throw new BadRequestException("An error occured", error);
+      throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 }
