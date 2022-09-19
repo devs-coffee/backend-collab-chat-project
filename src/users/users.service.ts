@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { SigninUserDto } from 'src/dtos/users/signin-user-dto';
-import { CreateUserDto } from '../dtos/users/create-user.dto';
+import { SigninUserDto } from '../dtos/users/signin-user-dto';
+import { UserDto } from '../dtos/users/user.dto';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -8,8 +8,8 @@ import { PrismaService } from '../prisma/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService)  {}
 
-  create(createUserDto: CreateUserDto) {
-    return this.prisma.user.create({ data: createUserDto});
+  create(user: UserDto) {
+    return this.prisma.user.create({ data: user});
   }
 
   findAll() {
