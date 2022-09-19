@@ -1,8 +1,9 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
-import { SigninUserDto } from 'src/dtos/users/signin-user-dto';
+import { SigninUserDto } from '../dtos/users/signin-user-dto';
+import { errorConstant } from '../constants/errors.constants';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -10,9 +11,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({ usernameField: 'email' });
   }
 
-  async validate(email: string, password: string): Promise<string> {
-    if(!email || !password){
-      throw new BadRequestException("Les champs email et mot de passe sont requis.")
+  async validate(email: string, password: string): Promise<object> {
+    if(email === "" || password === ""){
+      throw new Error(errorConstant.requiredPasswordEmailFields)
     }
     const signinUserDto : SigninUserDto = {email, password};
     const user = await this.authService.signin(signinUserDto);

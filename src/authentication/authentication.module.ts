@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthenticationController } from './authentication.controller';
 import { jwtConstants } from '../constants/auth.constants';
 import { JwtModule } from '@nestjs/jwt';
+import { Mapper } from '../core/mapper';
 
 @Module({
     controllers: [AuthenticationController],
@@ -13,6 +14,6 @@ import { JwtModule } from '@nestjs/jwt';
         secret: jwtConstants.secret,
         signOptions: { expiresIn: '60m' },
       }),],
-    providers: [AuthenticationService, LocalStrategy],
+    providers: [AuthenticationService, LocalStrategy, Mapper],
 })
 export class AuthenticationModule {}

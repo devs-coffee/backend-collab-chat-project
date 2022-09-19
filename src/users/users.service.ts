@@ -21,7 +21,7 @@ export class UsersService {
   }
 
   findByEmail(signinUserDto: SigninUserDto) {
-    return this.prisma.user.findFirst({ where: {AND:[{email : signinUserDto.email }]  }});
+    return this.prisma.user.findFirst({ where: {email : signinUserDto.email }});
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {

@@ -11,6 +11,9 @@ export class CreateUserDto {
     password: string;
 
     @ApiProperty()
+    passwordConfirm: string;
+
+    @ApiProperty()
     email: string;
 
     @ApiProperty()
