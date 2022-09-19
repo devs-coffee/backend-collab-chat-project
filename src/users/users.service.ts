@@ -3,12 +3,13 @@ import { SigninUserDto } from '../dtos/users/signin-user-dto';
 import { UserDto } from '../dtos/users/user.dto';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from 'src/dtos/users/create-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService)  {}
 
-  create(user: UserDto) {
+  create(user: CreateUserDto) {
     return this.prisma.user.create({ data: user});
   }
 

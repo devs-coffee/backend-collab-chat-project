@@ -1,9 +1,10 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import { createMap, forMember, ignore, Mapper } from '@automapper/core';
+import { createMap, Mapper } from '@automapper/core';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/users/create-user.dto';
 import { UserEntity } from '../users/entities/user.entity';
 import { UserDto } from '../dtos/users/user.dto';
+import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 
 @Injectable()
 export class AutoMapping extends AutomapperProfile {
@@ -14,10 +15,12 @@ export class AutoMapping extends AutomapperProfile {
     override get profile() {
         return (mapper) => {
             createMap(mapper, CreateUserDto, UserEntity);
-            createMap(mapper, UserEntity, UserDto, forMember(dest => dest.password, ignore()));
-            
-            // the following mapping should never be returned to the client
+            createMap(mapper, UserEntity, UserDto);
+            createMap(mapper, UserEntity, LoginSignupResponse);
             createMap(mapper, CreateUserDto, UserDto);
+            
+            // will map the user without passwordConfirm, necessary to be able to create a user
+            createMap(mapper, CreateUserDto, CreateUserDto);
         };
     }
 }

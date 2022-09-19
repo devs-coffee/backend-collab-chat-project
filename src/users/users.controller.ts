@@ -16,7 +16,7 @@ export class UsersController {
 
   @Get()
   @ApiOkResponse({ type: UserDto, isArray: true })
-  @ApiBadRequestResponse({type: BadRequestException})
+  @ApiBadRequestResponse({type: BadRequestException })
   async findAll() : Promise<OperationResult<UserDto[]>> {
     const response = new OperationResult<UserDto[]>();
     response.isSucceed = false;

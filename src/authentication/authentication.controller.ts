@@ -7,8 +7,8 @@ import { CreateUserDto } from '../dtos/users/create-user.dto';
 import { errorConstant } from '../constants/errors.constants';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 import { UserEntity } from '../users/entities/user.entity';
-import { UserDto } from '../dtos/users/user.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -17,17 +17,15 @@ export class AuthenticationController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  @ApiOkResponse({ type: Object })
+  @ApiOkResponse({ type: LoginSignupResponse })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async login(@Request() req) : Promise<OperationResult<Object>> {
-    const result = new OperationResult<Object>();
+  async login(@Request() req) : Promise<OperationResult<LoginSignupResponse>> {
+    const result = new OperationResult<LoginSignupResponse>();
     result.isSucceed = false;
-
     try {
       result.isSucceed = true;
       const response = req.user;
-      response.user = this.mapper.map(response.user, UserEntity, UserDto);
-      result.result = response;
+      result.result = response as LoginSignupResponse;
       return result;
     } catch (error) {
         Logger.log(error);
@@ -36,18 +34,18 @@ export class AuthenticationController {
   }
 
   @Post('signup')
-  @ApiCreatedResponse({ type: CreateUserDto })
+  @ApiCreatedResponse({ type: LoginSignupResponse })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async signup(@Body() user: CreateUserDto) : Promise<OperationResult<CreateUserDto>> {
-    const result = new OperationResult<CreateUserDto>();
+  async signup(@Body() user: CreateUserDto) : Promise<OperationResult<LoginSignupResponse>> {
+    const result = new OperationResult<LoginSignupResponse>();
     result.isSucceed = false;
     try {
       const createdUser = await this.authenticationService.signup(user);
       if(createdUser) {
         result.isSucceed = true;
-        result.result = this.mapper.map(createdUser, UserEntity, UserDto);
+        result.result = createdUser;
       } else {
-        result.result = null;
+        throw new Error(errorConstant.userDoesNotExist);
       }
       return result;
     } catch (error) {

@@ -8,6 +8,7 @@ import { errorConstant } from '../constants/errors.constants';
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
+import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 import { UserDto } from '../dtos/users/user.dto';
 
 @Injectable()
@@ -16,28 +17,32 @@ export class AuthenticationService {
 
   constructor(private readonly usersService: UsersService, private readonly jwtService: JwtService, @InjectMapper() private readonly classMapper: Mapper) {}
     
-  async signin(signinUser : SigninUserDto): Promise<Object> {
+  async signin(signinUser : SigninUserDto): Promise<LoginSignupResponse> | null {
+    const response = new LoginSignupResponse();
     const user = await this.usersService.findByEmail(signinUser);
     if (user && await bcrypt.compare(signinUser.password, user.password)) {
-        const buildToken = {userId : user.id, email: user.email, pseudo: user.pseudo};
-        return {
-          access_token : this.jwtService.sign(buildToken),
-          user: user
-        }
+        const buildToken = { userId : user.id, email: user.email, pseudo: user.pseudo };
+        response.access_token = this.jwtService.sign(buildToken);
+        response.user = this.classMapper.map(user, UserEntity, UserDto);
+        return response;
     }
     return null;
   }
 
-  async signup(user : CreateUserDto): Promise<UserEntity> {
+  async signup(user : CreateUserDto): Promise<LoginSignupResponse> | null {
+    const response = new LoginSignupResponse();
     if(user.password && user.password === user.passwordConfirm) {
         user.password = await bcrypt.hash(user.password, this.saltRound)
     } else {
       throw new Error(errorConstant.passwordNotMatching)
     }
-    const userToCreate = this.classMapper.map(user, CreateUserDto, UserDto);
+    const userToCreate = this.classMapper.map(user, CreateUserDto, CreateUserDto);
     const createdUser = await this.usersService.create(userToCreate);
     if (createdUser) {
-        return createdUser;
+      const buildToken = { userId : createdUser.id, email: createdUser.email, pseudo: createdUser.pseudo };
+      response.access_token = this.jwtService.sign(buildToken);
+      response.user = this.classMapper.map(createdUser, UserEntity, UserDto);
+      return response;
     }
     return null;
   }

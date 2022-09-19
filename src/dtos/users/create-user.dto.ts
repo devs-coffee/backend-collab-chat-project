@@ -1,11 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
 
-export class CreateUserDto {
-    @AutoMap()
-    @ApiProperty()
-    id?: string;
-
+export class CreateUserDto implements IUser {
     @AutoMap()
     @ApiProperty()
     pseudo: string;
