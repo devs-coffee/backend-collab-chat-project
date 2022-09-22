@@ -1,49 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, Logger } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, BadRequestException, Logger } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
+import { UpdateUserDto } from '../dtos/users/update-user.dto';
+import { ApiTags, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
-import { Mapper } from '../core/mapper';
+import { InjectMapper } from '@automapper/nestjs';
+import { Mapper } from '@automapper/core';
+import { UserDto } from '../dtos/users/user.dto';
+import { UserEntity } from './entities/user.entity';
+import { errorConstant } from '../constants/errors.constants';
 
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService, private readonly mapper: Mapper) {}
-
-  @Post()
-  @ApiCreatedResponse({ type: CreateUserDto })
-  @ApiBadRequestResponse({ type : BadRequestException})
-  async create(@Body() createUserDto: CreateUserDto) : Promise<OperationResult<CreateUserDto>> {
-    const result = new OperationResult<CreateUserDto>();
-    result.isSucceed = false;
-    try {
-      const createdUser = await this.usersService.create(createUserDto);
-      if(createdUser) {
-        result.isSucceed = true;
-        result.result = this.mapper.userEntityToDto(createdUser) as CreateUserDto;
-      } else {
-        result.result = null;
-      }
-
-      return result;
-    } catch (error) {
-        Logger.log(error);
-        throw new BadRequestException("an error occured");
-    }
-  }
+  constructor(private readonly usersService: UsersService, @InjectMapper() private readonly mapper: Mapper) {}
 
   @Get()
-  @ApiOkResponse({ type: CreateUserDto, isArray: true })
-  @ApiBadRequestResponse({type: BadRequestException})
-  async findAll() : Promise<OperationResult<CreateUserDto[]>> {
-    const response = new OperationResult<CreateUserDto[]>();
+  @ApiOkResponse({ type: UserDto, isArray: true })
+  @ApiBadRequestResponse({type: BadRequestException })
+  async findAll() : Promise<OperationResult<UserDto[]>> {
+    const response = new OperationResult<UserDto[]>();
     response.isSucceed = false;
     try {
       const users = await this.usersService.findAll();
       if(users && users.length > 0) {
         response.isSucceed = true;
-        response.result = this.mapper.userEntityToDto(users) as CreateUserDto[];
+        response.result = this.mapper.mapArray(users, UserEntity, UserDto);
       } else {
         response.result = [];
       }
@@ -51,22 +32,21 @@ export class UsersController {
       return response;
     } catch (error) {
       Logger.log(error);
-      throw new BadRequestException("An error occured", error);
+      throw new BadRequestException(errorConstant.errorOccured);
     }
-
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: CreateUserDto })
+  @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async findOne(@Param('id') id: string) {
-    const response = new OperationResult<CreateUserDto>();
+    const response = new OperationResult<UserDto>();
     response.isSucceed = false;
     try {
       const user = await this.usersService.findOne(id);
       if(user) {
         response.isSucceed = true;
-        response.result = this.mapper.userEntityToDto(user) as CreateUserDto;
+        response.result = this.mapper.map(user, UserEntity, UserDto);
       } else {
         response.result = null;
       }
@@ -74,21 +54,21 @@ export class UsersController {
       return response;
     } catch (error) {
       Logger.log(error);
-      throw new BadRequestException("An error occured", error);
+      throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 
   @Patch(':id')
-  @ApiOkResponse({ type: CreateUserDto })
+  @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const result = new OperationResult<CreateUserDto>();
+    const result = new OperationResult<UserDto>();
     result.isSucceed = false;
     try {
-      const createdUser = await this.usersService.update(id, updateUserDto);
-      if(createdUser) {
+      const updatedUser = await this.usersService.update(id, updateUserDto);
+      if(updatedUser) {
         result.isSucceed = true;
-        result.result = this.mapper.userEntityToDto(createdUser) as CreateUserDto;
+        result.result = this.mapper.map(updatedUser, UserEntity, UserDto);
       } else {
         result.result = null;
       }
@@ -96,7 +76,7 @@ export class UsersController {
       return result;
     } catch (error) {
         Logger.log(error);
-        throw new BadRequestException("an error occured");
+        throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 
@@ -114,7 +94,7 @@ export class UsersController {
 
     } catch (error) {
       Logger.log(error);
-      throw new BadRequestException("An error occured", error);
+      throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 }
