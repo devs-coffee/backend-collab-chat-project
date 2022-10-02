@@ -1,4 +1,4 @@
 interface IUser {
-    pseudo: string;
+    pseudo?: string;
     picture?: string;
 }

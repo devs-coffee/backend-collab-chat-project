@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, BadRequestException, Logger } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, BadRequestException, Logger, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { ApiTags, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
@@ -8,12 +8,14 @@ import { Mapper } from '@automapper/core';
 import { UserDto } from '../dtos/users/user.dto';
 import { UserEntity } from './entities/user.entity';
 import { errorConstant } from '../constants/errors.constants';
+import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService, @InjectMapper() private readonly mapper: Mapper) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOkResponse({ type: UserDto, isArray: true })
   @ApiBadRequestResponse({type: BadRequestException })
@@ -36,6 +38,7 @@ export class UsersController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
@@ -58,6 +61,7 @@ export class UsersController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
@@ -80,6 +84,7 @@ export class UsersController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOkResponse({ type: Boolean })
   @ApiBadRequestResponse({type: BadRequestException})
