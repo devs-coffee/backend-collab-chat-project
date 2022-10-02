@@ -23,6 +23,8 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, UserEntity, UserDto);
             createMap(mapper, UserEntity, LoginSignupResponse);
             createMap(mapper, CreateUserDto, UserDto);
+            createMap(mapper, UpdateUserDto, UserEntity);
+
             // will map the user without passwordConfirm, necessary to be able to create a user
             createMap(mapper, CreateUserDto, CreateUserDto);
 
