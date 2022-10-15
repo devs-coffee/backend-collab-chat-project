@@ -42,10 +42,11 @@ export class ServerController {
   @Post()
   @ApiCreatedResponse({ type: ServerDto })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async createServer(@Body() server: ServerDto) : Promise<OperationResult<ServerDto>> {
+  async createServer(@Body() server: ServerDto, @Request()req ) : Promise<OperationResult<ServerDto>> {
     const result = new OperationResult<ServerDto>();
     result.isSucceed = false;
     try {
+      server.userId = req.user.id;
       const createdServer = await this.serverService.create(server);
       if(createdServer) {
         result.isSucceed = true;

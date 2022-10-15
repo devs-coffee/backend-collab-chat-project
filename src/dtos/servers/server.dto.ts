@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import { AutomapperModule } from '@automapper/nestjs';
 
 export class ServerDto {
     @AutoMap()
     @ApiProperty()
-    id: string;
+    id?: string;
 
     @AutoMap()
     @ApiProperty()
@@ -14,6 +15,8 @@ export class ServerDto {
     @ApiProperty()
     picture?: string;
 
-    @ApiProperty()
+    @AutoMap()
+    isPrivate: boolean;
+
     userId: string;
 }

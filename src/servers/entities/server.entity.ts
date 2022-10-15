@@ -15,6 +15,9 @@ export class ServerEntity implements Server {
     @ApiProperty({ required: false, nullable: true})
     picture: string;
 
+    @AutoMap()
+    isPrivate: boolean;
+
     @ApiProperty()
     createdAt: Date;
 
