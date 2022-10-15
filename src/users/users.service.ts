@@ -54,7 +54,6 @@ export class UsersService {
   }
 
   findAllUsersByServerId(serverId: string){
-    console.log("serverId", serverId)
-    return this.prisma.user.findMany({where: { servers : { some : {serverId}}}});
+    return this.prisma.user.findMany({where: { servers : { some : { serverId }}}, orderBy: { pseudo : 'asc'}});
   }
 }
