@@ -16,6 +16,7 @@ model User {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
   servers   UserServer[]
+  channels  UserChannel[]
 }
 
 model Server {
@@ -36,4 +37,32 @@ model UserServer {
   updatedAt DateTime @updatedAt
   server    Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Channel {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  messages  Message[]
+  users     UserChannel[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserChannel {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  channelId String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  channel   Channel @relation(fields: [channelId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content   String
+  channelId String   @db.Uuid 
+  channel   Channel  @relation(fields: [channelId], references: [id]) 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
