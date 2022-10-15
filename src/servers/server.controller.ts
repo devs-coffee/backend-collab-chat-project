@@ -9,11 +9,14 @@ import { ServerService } from './server.service';
 import { ServerDto } from '../dtos/servers/server.dto';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { UpdateServerDto } from '../dtos/servers/update-server.dto';
+import { UsersService } from '../users/users.service';
+import { UserDto } from '../dtos/users/user.dto';
+import { UserEntity } from '../users/entities/user.entity';
 
 @Controller('servers')
 @ApiTags('servers')
 export class ServerController {
-  constructor(private readonly serverService: ServerService, @InjectMapper() private readonly mapper: Mapper) {}
+  constructor(private readonly serverService: ServerService, @InjectMapper() private readonly mapper: Mapper, private readonly userService: UsersService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -39,10 +42,33 @@ export class ServerController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get(":serverId/users")
+  @ApiOkResponse({ type: UserDto, isArray: true })
+  @ApiBadRequestResponse({type: BadRequestException })
+  async GetAllUserByServerId(@Request() req, @Param('serverId') serverId: string) : Promise<OperationResult<UserDto[]>> {
+    const response = new OperationResult<UserDto[]>();
+    response.isSucceed = false;
+    try {
+      const users = await this.userService.findAllUsersByServerId(serverId);
+      if(users && users.length > 0) {
+        response.isSucceed = true;
+        response.result = this.mapper.mapArray(users, UserEntity, UserDto);
+      } else {
+        response.result = [];
+      }
+
+      return response;
+    } catch (error) {
+      Logger.log(error);
+      throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiCreatedResponse({ type: ServerDto })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async createServer(@Body() server: ServerDto, @Request()req ) : Promise<OperationResult<ServerDto>> {
+  async createServer(@Body() server: ServerDto, @Request() req) : Promise<OperationResult<ServerDto>> {
     const result = new OperationResult<ServerDto>();
     result.isSucceed = false;
     try {
@@ -87,10 +113,11 @@ export class ServerController {
   @Patch(':id')
   @ApiOkResponse({ type: UpdateServerDto })
   @ApiBadRequestResponse({type: BadRequestException})
-  async update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto) {
+  async update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto, @Request() req) {
     const result = new OperationResult<UpdateServerDto>();
     result.isSucceed = false;
     try {
+      updateServerDto.userId = req.user.id;
       const updatedServer = await this.serverService.update(id, updateServerDto);
       if(updatedServer) {
         result.isSucceed = true;

@@ -52,4 +52,9 @@ export class UsersService {
   remove(id: string) {
     return this.prisma.user.delete({ where: { id } });
   }
+
+  findAllUsersByServerId(serverId: string){
+    console.log("serverId", serverId)
+    return this.prisma.user.findMany({where: { servers : { some : {serverId}}}});
+  }
 }
