@@ -33,6 +33,7 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, ServerEntity, ServerDto);
             createMap(mapper, ServerDto, UpdateServerDto);
             createMap(mapper, UpdateServerDto, ServerDto);
+            createMap(mapper, UpdateServerDto, ServerEntity);
         };
     }
 }
