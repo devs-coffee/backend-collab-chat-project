@@ -53,18 +53,20 @@ export class ServerService {
   }
 
   async remove(id: string, userId: string) {
-      const userServer = await this.prisma.userServer.findFirst({ where: { serverId: id, userId : userId }});
-      if(!userServer){
+    const userServer = await this.prisma.userServer.findFirst({ where: { serverId: id, userId : userId }});
+    console.log(userServer)
+    if(!userServer){
+      throw new Error(errorConstant.itemNotExisting);
+    }
+    if(userServer && userServer.isAdmin){
+        // remove server & on cascade userServer
+        const deleted = await this.prisma.server.delete({ where: { id } });
+        console.log(deleted)
+        if(deleted){
+          return true;
+        }
         throw new Error(errorConstant.itemNotExisting);
-      }
-      if(userServer && userServer.isAdmin){
-         // remove server & on cascade userServer
-          const deleted = await this.prisma.server.delete({ where: { id } });
-          if(deleted){
-            return true;
-          }
-          throw new Error(errorConstant.itemNotExisting);
-      }
-      return false;
+    }
+    return false;
   }
 }

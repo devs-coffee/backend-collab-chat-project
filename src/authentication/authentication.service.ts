@@ -17,7 +17,7 @@ export class AuthenticationService {
   private readonly saltRound = 10;
 
   constructor(private readonly usersService: UsersService, private readonly jwtService: JwtService, @InjectMapper() private readonly classMapper: Mapper, private readonly serverService: ServerService) {}
-    
+
   async signin(signinUser : SigninUserDto): Promise<LoginSignupResponse> | null {
     const response = new LoginSignupResponse();
     const user = await this.usersService.findByEmail(signinUser);
@@ -43,12 +43,12 @@ export class AuthenticationService {
       const buildToken = { userId : createdUser.id, email: createdUser.email, pseudo: createdUser.pseudo };
       response.access_token = this.jwtService.sign(buildToken);
       response.user = this.classMapper.map(createdUser, UserEntity, UserDto);
-      
-      this.serverService.create({
-        name:'messages privés',
-        isPrivate: true,
-        userId: createdUser.id
-      })
+
+      // this.serverService.create({
+      //   name:'messages privés',
+      //   isPrivate: true,
+      //   userId: createdUser.id
+      // })
       return response;
     }
     return null;

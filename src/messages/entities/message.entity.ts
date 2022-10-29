@@ -1,19 +1,23 @@
-import { Server } from '@prisma/client';
+import { Message, Server } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
 
-export class ServerEntity implements Server {
+export class MessageEntity implements Message {
     @AutoMap()
     @ApiProperty()
     id: string;
 
     @AutoMap()
     @ApiProperty()
-    name: string;
+    content: string;
 
     @AutoMap()
-    @ApiProperty({ required: false, nullable: true})
-    picture: string;
+    @ApiProperty()
+    userId: string;
+
+    @ApiProperty()
+    @AutoMap()
+    channelId: string;
 
     @ApiProperty()
     createdAt: Date;
