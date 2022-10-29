@@ -57,6 +57,7 @@ export class AutoMapping extends AutomapperProfile {
                 mapWith(UserDto, UserEntity, (source) => source.user))
             );
             createMap(mapper, ChannelDto, ChannelEntity);
+            createMap(mapper, UpdateServerDto, ServerEntity);
         };
     }
 }
