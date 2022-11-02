@@ -44,16 +44,16 @@ export class ChannelController {
 
     @UseGuards(JwtAuthGuard)
     @Get(":id")
-    @ApiCreatedResponse({ type: ChannelEntity, isArray : true })
+    @ApiCreatedResponse({ type: ChannelDto, isArray : true })
     @ApiBadRequestResponse({ type : BadRequestException})
-    async getUserChannels(@Request() req, @Param('id') id: string) : Promise<OperationResult<ChannelEntity[]>> {
-      const result = new OperationResult<ChannelEntity[]>();
+    async getUserChannels(@Request() req, @Param('id') id: string) : Promise<OperationResult<ChannelDto[]>> {
+      const result = new OperationResult<ChannelDto[]>();
       result.isSucceed = false;
       try {
         const channels = await this.channelService.findChannelsByUserId(id);
         if(channels) {
           result.isSucceed = true;
-          result.result = channels;
+          result.result = this.mapper.mapArray(channels, ChannelEntity, ChannelDto);
         } else {
           throw new BadRequestException(errorConstant.serverNotCreated);
         }
