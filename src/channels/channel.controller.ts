@@ -44,14 +44,13 @@ export class ChannelController {
 
     @UseGuards(JwtAuthGuard)
     @Get(":id")
-    @ApiCreatedResponse({ type: UserEntity })
+    @ApiCreatedResponse({ type: ChannelEntity, isArray : true })
     @ApiBadRequestResponse({ type : BadRequestException})
-    async getUserChannels(@Request() req, @Param('id') id: string) : Promise<OperationResult<UserEntity>> {
-      const result = new OperationResult<UserEntity>();
+    async getUserChannels(@Request() req, @Param('id') id: string) : Promise<OperationResult<ChannelEntity[]>> {
+      const result = new OperationResult<ChannelEntity[]>();
       result.isSucceed = false;
       try {
         const channels = await this.channelService.findChannelsByUserId(id);
-        console.log(channels)
         if(channels) {
           result.isSucceed = true;
           result.result = channels;

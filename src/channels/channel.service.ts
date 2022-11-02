@@ -22,9 +22,9 @@ export class ChannelService {
     }
 
     async findChannelsByUserId(userId: string) {
-      const channels = await this.prisma.user.findFirst({where : {id : userId}, include : { channels : { include : { channel : true}}}});
-      console.log(channels)
-      return channels;
+      const { channels } = await this.prisma.user.findFirst({where : {id : userId}, include : { channels : { select : { channelId : true}}}});
+      const usersChannels = await this.prisma.channel.findMany({where : { id : { in : channels.map(c => c.channelId)}}, include : { users : { include : { user : true }}}});
+      return usersChannels;
     }
 
     async findChannelById(channelId: string){
