@@ -27,13 +27,8 @@ export class ServerController {
     response.isSucceed = false;
     try {
       const servers = await this.serverService.findAll(req.user.id);
-      if(servers && servers.length > 0) {
-        response.isSucceed = true;
-        response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
-      } else {
-        response.result = [];
-      }
-
+      response.isSucceed = true;
+      response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
       return response;
     } catch (error) {
       Logger.log(error);
@@ -50,13 +45,8 @@ export class ServerController {
     response.isSucceed = false;
     try {
       const users = await this.userService.findAllUsersByServerId(serverId);
-      if(users && users.length > 0) {
-        response.isSucceed = true;
-        response.result = this.mapper.mapArray(users, UserEntity, UserDto);
-      } else {
-        response.result = [];
-      }
-
+      response.isSucceed = true;
+      response.result = this.mapper.mapArray(users, UserEntity, UserDto);
       return response;
     } catch (error) {
       Logger.log(error);
@@ -95,12 +85,8 @@ export class ServerController {
     response.isSucceed = false;
     try {
       const server = await this.serverService.findOne(id);
-      if(server) {
-        response.isSucceed = true;
-        response.result = this.mapper.map(server, ServerEntity, ServerDto);
-      } else {
-        response.result = null;
-      }
+      response.isSucceed = true;
+      response.result = this.mapper.map(server, ServerEntity, ServerDto);
       return response;
     } catch (error) {
       Logger.log(error);

@@ -46,12 +46,8 @@ export class ChannelController {
       result.isSucceed = false;
       try {
         const channels = await this.channelService.findChannelsByUserId(req.user.id);
-        if(channels) {
-          result.isSucceed = true;
-          result.result = this.mapper.mapArray(channels, ChannelEntity, ChannelDto);
-        } else {
-          throw new BadRequestException(errorConstant.cannotGetUserChannels);
-        }
+        result.isSucceed = true;
+        result.result = this.mapper.mapArray(channels, ChannelEntity, ChannelDto);
         return result;
       } catch (error) {
           Logger.log(error);

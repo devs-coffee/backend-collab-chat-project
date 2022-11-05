@@ -23,12 +23,8 @@ export class MessagesController {
     result.isSucceed = false;
     try {
       const messages = await this.messagesService.getMyMessagesByChannelId(id);
-      if(messages) {
-        result.isSucceed = true;
-        result.result = this.mapper.mapArray(messages, MessageCreateEntity, MessageDto);
-      } else {
-        throw new BadRequestException(errorConstant.serverNotCreated);
-      }
+      result.isSucceed = true;
+      result.result = this.mapper.mapArray(messages, MessageCreateEntity, MessageDto);
       return result;
     } catch (error) {
         Logger.log(error);
