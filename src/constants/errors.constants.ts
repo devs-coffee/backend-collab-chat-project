@@ -5,5 +5,6 @@ export const errorConstant = {
     userDoesNotExist: "L'utilisateur n'existe pas.",
     serverNotCreated: "Nous n'avons pas pu créer le serveur, veuillez réessayer plus tard.",
     noUserRights: "Vous n'avez pas les droits pouur mettre à jour le serveur.",
-    itemNotExisting: "L'item n'existe pas."
+    itemNotExisting: "L'item n'existe pas.",
+    cannotGetUserChannels : "Nous n'avons pas pu récupérer les channels, veuillez réessayer plus tard."
   };

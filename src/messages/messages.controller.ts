@@ -7,13 +7,34 @@ import { Mapper } from '@automapper/core';
 import { errorConstant } from '../constants/errors.constants';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { MessageDto } from '../dtos/messages/create-message.dto';
-import { MessageEntity } from './entities/message.entity';
+import { MessageCreateEntity } from './entities/message.create.entity';
 
 @Controller('messages')
 @ApiTags('messages')
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService, @InjectMapper() private readonly mapper: Mapper) {}
 
+  @UseGuards(JwtAuthGuard)
+  @Get(":id")
+  @ApiCreatedResponse({ type: MessageDto, isArray : true })
+  @ApiBadRequestResponse({ type : BadRequestException})
+  async getMessages(@Param("id") id : string) : Promise<OperationResult<MessageDto[]>> {
+    const result = new OperationResult<MessageDto[]>();
+    result.isSucceed = false;
+    try {
+      const messages = await this.messagesService.getMyMessagesByChannelId(id);
+      if(messages) {
+        result.isSucceed = true;
+        result.result = this.mapper.mapArray(messages, MessageCreateEntity, MessageDto);
+      } else {
+        throw new BadRequestException(errorConstant.serverNotCreated);
+      }
+      return result;
+    } catch (error) {
+        Logger.log(error);
+        throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
     @UseGuards(JwtAuthGuard)
     @Post()
     @ApiCreatedResponse({ type: MessageDto })
@@ -22,10 +43,10 @@ export class MessagesController {
       const result = new OperationResult<MessageDto>();
       result.isSucceed = false;
       try {
-        const createdMessage = await this.messagesService.create({...message, fromUserId: req.user.id});
+        const createdMessage = await this.messagesService.create({...message, userId: req.user.id});
         if(createdMessage) {
           result.isSucceed = true;
-          result.result = this.mapper.map(createdMessage, MessageEntity, MessageDto);
+          result.result = this.mapper.map(createdMessage, MessageCreateEntity, MessageDto);
         } else {
           throw new BadRequestException(errorConstant.serverNotCreated);
         }

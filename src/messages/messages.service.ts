@@ -12,46 +12,32 @@ export class MessagesService {
   constructor(private prisma: PrismaService, @InjectMapper() private readonly mapper: Mapper, private readonly channelService : ChannelService)  {}
 
   async create(messageDto: MessageDto) {
-      const message = this.mapper.map(messageDto, MessageDto, MessageEntity);
-      let channelId = message.channelId;
-      if(!channelId) {
-        // create channel first
-        const {server} = await this.prisma.userServer.findFirst({ where : { userId : message.userId}, select : { server : true}});
-        const serverId = server.id;
-        const channel = new ChannelEntity();
-        channel.serverId = serverId;
-        channel.title = "";
-        const createdChannel = await this.channelService.create(channel);
-        channelId = createdChannel.id;
-        await this.prisma.userChannel.createMany({data : 
-          [
-            {
+    const message = this.mapper.map(messageDto, MessageDto, MessageEntity);
+    let channelId = message.channelId;
+    if(!channelId) {
+      // if no channel then it is a new message (one to one) so we need to create channel first
+      const channel = new ChannelEntity();
+      channel.title = "";
+      const createdChannel = await this.channelService.create(channel);
+      channelId = createdChannel.id;
+      await this.prisma.userChannel.createMany({data : 
+        [
+          {
             userId : message.userId,
             channelId : channelId
-            },
-            {
-              userId : messageDto.fromUserId,
-              channelId: channelId
-            }
-          ]
+          },
+          {
+            userId : messageDto.toUserId,
+            channelId: channelId
+          }
+        ]
       })
-      } 
-      return this.prisma.message.create({data : {...message, channelId}});
-      // const userServers = await this.prisma.userServer.findMany(
-      //   { 
-      //     where : {
-      //         userId 
-      //       },
-      //       select : {
-      //         server : true
-      //       }
-      //   });
-
-      // const {server} = userServers.find(s => s.server.isPrivate);
-      // const serverId = server.id;
-      // if(serverId) {
-      //   this.prisma.channel.findFirst({ where : { serverId }})
-      // }
+    } 
+    return this.prisma.message.create({data : {...message, channelId}});
   }
 
+  async getMyMessagesByChannelId(channelId: string){
+    const messages = await this.prisma.message.findMany({where : { channelId }, include : { user : true}});
+    return messages;
+  }
 }

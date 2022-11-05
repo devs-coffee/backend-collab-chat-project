@@ -8,12 +8,7 @@ import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { ChannelService } from './channel.service';
 import { ChannelDto } from '../dtos/channels/channel.dto';
 import { ChannelEntity } from './entities/channel.entity';
-import { UserEntity } from '../users/entities/user.entity';
-import { UserDto } from 'src/dtos/users/user.dto';
-import { UserChannel } from '@prisma/client';
 import { ServerEntity } from '../servers/entities/server.entity';
-import { UserChannelDto } from 'src/dtos/channels/channel.user.dto';
-import { UserChannelEntity } from './entities/userChannel.entity';
 
 @Controller('channels')
 @ApiTags('channels')
@@ -43,19 +38,19 @@ export class ChannelController {
     // }
 
     @UseGuards(JwtAuthGuard)
-    @Get(":id")
+    @Get("me")
     @ApiCreatedResponse({ type: ChannelDto, isArray : true })
     @ApiBadRequestResponse({ type : BadRequestException})
-    async getUserChannels(@Request() req, @Param('id') id: string) : Promise<OperationResult<ChannelDto[]>> {
+    async getUserChannels(@Request() req) : Promise<OperationResult<ChannelDto[]>> {
       const result = new OperationResult<ChannelDto[]>();
       result.isSucceed = false;
       try {
-        const channels = await this.channelService.findChannelsByUserId(id);
+        const channels = await this.channelService.findChannelsByUserId(req.user.id);
         if(channels) {
           result.isSucceed = true;
           result.result = this.mapper.mapArray(channels, ChannelEntity, ChannelDto);
         } else {
-          throw new BadRequestException(errorConstant.serverNotCreated);
+          throw new BadRequestException(errorConstant.cannotGetUserChannels);
         }
         return result;
       } catch (error) {

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import { UserDto } from '../users/user.dto';
 
 export class MessageDto {
     @AutoMap()
@@ -12,11 +13,14 @@ export class MessageDto {
 
     @AutoMap()
     @ApiProperty()
-    userId?: string;
+    userId: string;
 
-    fromUserId: string;
+    toUserId?: string;
 
     @AutoMap()
     @ApiProperty()
     channelId? : string;
+
+    @AutoMap()
+    user?: UserDto;
 }

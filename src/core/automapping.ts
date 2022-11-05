@@ -1,5 +1,5 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import { createMap, forMember, mapFrom, Mapper, mapWith } from '@automapper/core';
+import { createMap, forMember, ignore, mapFrom, Mapper, mapWith } from '@automapper/core';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/users/create-user.dto';
 import { UserEntity } from '../users/entities/user.entity';
@@ -15,6 +15,7 @@ import { ChannelEntity } from '../channels/entities/channel.entity';
 import { ChannelDto } from '../dtos/channels/channel.dto';
 import { UserChannelEntity } from '../channels/entities/userChannel.entity';
 import { UserChannelDto } from '../dtos/channels/channel.user.dto';
+import { MessageCreateEntity } from '../messages/entities/message.create.entity';
 
 @Injectable()
 export class AutoMapping extends AutomapperProfile {
@@ -41,9 +42,12 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, UpdateServerDto, ServerDto);
 
             // messages
-            createMap(mapper, MessageEntity, MessageDto);
             createMap(mapper, MessageDto, MessageEntity);
-
+            createMap(mapper, MessageEntity, MessageDto);
+            createMap(mapper, MessageCreateEntity, MessageDto, forMember(
+                (destination) => destination.user,
+                mapWith(UserDto, UserEntity, (source) => source.user))
+            );
             // channels
             createMap(mapper, ChannelEntity, ChannelDto, forMember(
                 (destination) => destination.users,

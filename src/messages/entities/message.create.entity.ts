@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
 import { UserEntity } from '../../users/entities/user.entity';
 
-export class MessageEntity implements Message {
+export class MessageCreateEntity implements Message {
     @AutoMap()
     @ApiProperty()
     id: string;
@@ -25,4 +25,7 @@ export class MessageEntity implements Message {
 
     @ApiProperty()
     updatedAt: Date;
+
+    @AutoMap()
+    user?: UserEntity;
 }
