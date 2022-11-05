@@ -55,7 +55,6 @@ export class ServerService {
 
   async remove(id: string, userId: string) {
     const userServer = await this.prisma.userServer.findFirst({ where: { serverId: id, userId : userId }});
-    console.log(userServer)
     if(!userServer){
       throw new Error(errorConstant.itemNotExisting);
     }
