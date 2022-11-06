@@ -1,23 +1,15 @@
-import { User } from '@prisma/client';
+import { Server } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
 
-export class UserEntity implements User {
+export class ServerEntity implements Server {
     @AutoMap()
     @ApiProperty()
     id: string;
 
     @AutoMap()
     @ApiProperty()
-    pseudo: string;
-
-    @AutoMap()
-    @ApiProperty()
-    password: string;
-
-    @AutoMap()
-    @ApiProperty()
-    email: string;
+    name: string;
 
     @AutoMap()
     @ApiProperty({ required: false, nullable: true})
