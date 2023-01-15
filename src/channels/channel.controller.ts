@@ -14,7 +14,6 @@ import { ServerEntity } from '../servers/entities/server.entity';
 @ApiTags('channels')
 export class ChannelController {
   constructor(private readonly channelService: ChannelService, @InjectMapper() private readonly mapper: Mapper) {}
-
     // @UseGuards(JwtAuthGuard)
     // @Get(":serverid")
     // @ApiCreatedResponse({ type: ServerEntity, isArray : true })
