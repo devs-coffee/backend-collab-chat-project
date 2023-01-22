@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { ChannelEntity } from './entities/channel.entity';
+import { ChannelDto } from '../dtos/channels/channel.dto';
 
 @Injectable()
 export class ChannelService {
@@ -17,10 +18,10 @@ export class ChannelService {
     //   return channels;
     // }
 
-    // async findChannelsByServerId(serverId: string) {
-    //   const channels = await this.prisma.server.findFirst({ where : { id : serverId }, include: { channels : true }});
-    //   return channels;
-    // }
+    async findChannelsByServerId(serverId: string) {
+      const channels = await this.prisma.server.findFirst({ where : { id : serverId }, include: { channels : true }});
+      return channels;
+    }
 
     async findChannelsByUserId(userId: string) {
       const { channels } = await this.prisma.user.findFirst({where : {id : userId}, include : { channels : { select : { channelId : true}}}});

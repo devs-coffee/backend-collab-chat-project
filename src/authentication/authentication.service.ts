@@ -1,5 +1,5 @@
 import { UsersService } from '../users/users.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { SigninUserDto } from '../dtos/users/signin-user-dto';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../dtos/users/create-user.dto';
