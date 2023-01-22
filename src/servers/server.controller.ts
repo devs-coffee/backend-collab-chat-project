@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, Request, BadRequestException, Logger, UseGuards, Post } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, Request, BadRequestException, Logger, UseGuards, Post, Put } from '@nestjs/common';
 import { ApiTags, ApiOkResponse, ApiBadRequestResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
 import { InjectMapper } from '@automapper/nestjs';
@@ -95,7 +95,7 @@ export class ServerController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Put(':id')
   @ApiOkResponse({ type: UpdateServerDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto, @Request() req) {

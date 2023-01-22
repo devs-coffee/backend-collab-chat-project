@@ -6,6 +6,7 @@ import { MessageDto } from '../dtos/messages/create-message.dto';
 import { ChannelService } from '../channels/channel.service';
 import { ChannelEntity } from '../channels/entities/channel.entity';
 import { MessageEntity } from './entities/message.entity';
+import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
 
 @Injectable()
 export class MessagesService {
@@ -39,5 +40,9 @@ export class MessagesService {
   async getMyMessagesByChannelId(channelId: string){
     const messages = await this.prisma.message.findMany({where : { channelId }, include : { user : true}});
     return messages;
+  }
+
+  async update(messageId: string, messageEntity: MessageEntity) {
+    return await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
   }
 }

@@ -16,6 +16,9 @@ import { ChannelDto } from '../dtos/channels/channel.dto';
 import { UserChannelEntity } from '../channels/entities/userChannel.entity';
 import { UserChannelDto } from '../dtos/channels/channel.user.dto';
 import { MessageCreateEntity } from '../messages/entities/message.create.entity';
+import { ChannelServerDto } from '../dtos/channels/channel.server.dto';
+import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
+import { ServerChannelEntity } from '../servers/entities/server.channels.entity';
 
 @Injectable()
 export class AutoMapping extends AutomapperProfile {
@@ -48,6 +51,8 @@ export class AutoMapping extends AutomapperProfile {
                 (destination) => destination.user,
                 mapWith(UserDto, UserEntity, (source) => source.user))
             );
+            createMap(mapper, UpdateMessageDto, MessageEntity);
+
             // channels
             createMap(mapper, ChannelEntity, ChannelDto, forMember(
                 (destination) => destination.users,
@@ -56,12 +61,17 @@ export class AutoMapping extends AutomapperProfile {
 
             createMap(mapper, UserChannelDto, UserChannelEntity);
 
-            createMap(mapper, UserChannelEntity, UserChannelDto,forMember(
+            createMap(mapper, UserChannelEntity, UserChannelDto, forMember(
                 (destination) => destination.user,
                 mapWith(UserDto, UserEntity, (source) => source.user))
             );
             createMap(mapper, ChannelDto, ChannelEntity);
             createMap(mapper, UpdateServerDto, ServerEntity);
+
+            createMap(mapper, ServerChannelEntity, ChannelServerDto, forMember(
+                (destination) => destination.channels,
+                mapWith(ChannelDto, ChannelEntity, (source) => source.channels))
+            );
         };
     }
 }

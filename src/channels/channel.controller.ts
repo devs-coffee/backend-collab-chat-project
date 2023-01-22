@@ -9,6 +9,8 @@ import { ChannelService } from './channel.service';
 import { ChannelDto } from '../dtos/channels/channel.dto';
 import { ChannelEntity } from './entities/channel.entity';
 import { ServerEntity } from '../servers/entities/server.entity';
+import { ChannelServerDto } from '../dtos/channels/channel.server.dto';
+import { ServerChannelEntity } from '../servers/entities/server.channels.entity';
 
 @Controller('channels')
 @ApiTags('channels')
@@ -58,9 +60,31 @@ export class ChannelController {
 
   @UseGuards(JwtAuthGuard)
   @Get(":serverid")
+  @ApiCreatedResponse({ type: ChannelServerDto, isArray : true })
+  @ApiBadRequestResponse({ type : BadRequestException})
+  async getChannels(@Param('serverid') id: string) : Promise<OperationResult<ChannelServerDto>> {
+    const result = new OperationResult<ChannelServerDto>();
+    result.isSucceed = false;
+    try {
+      const channels = await this.channelService.findChannelsByServerId(id);
+      if(channels) {
+        result.isSucceed = true;
+        result.result = this.mapper.map(channels, ServerChannelEntity, ChannelServerDto);
+      } else {
+        throw new BadRequestException(errorConstant.serverNotCreated);
+      }
+      return result;
+    } catch (error) {
+        Logger.log(error);
+        throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(":channelId")
   @ApiCreatedResponse({ type: ServerEntity, isArray : true })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async getChannels(@Param('serverid') id: string) : Promise<OperationResult<ServerEntity>> {
+  async updateChannels(@Param('channelId') id: string) : Promise<OperationResult<ServerEntity>> {
     const result = new OperationResult<ServerEntity>();
     result.isSucceed = false;
     try {
@@ -77,4 +101,5 @@ export class ChannelController {
         throw new BadRequestException(errorConstant.errorOccured);
     }
   }
+
 }

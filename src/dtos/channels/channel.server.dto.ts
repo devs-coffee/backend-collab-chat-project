@@ -1,9 +1,10 @@
-import { Server } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { ChannelEntity } from 'src/channels/entities/channel.entity';
+import { UserChannelDto } from './channel.user.dto';
+import { ServerDto } from '../servers/server.dto';
+import { ChannelDto } from './channel.dto';
 
-export class ServerEntity implements Server {
+export class ChannelServerDto {
     @AutoMap()
     @ApiProperty()
     id: string;
@@ -16,9 +17,7 @@ export class ServerEntity implements Server {
     @ApiProperty({ required: false, nullable: true})
     picture: string;
 
+    @AutoMap()
     @ApiProperty()
-    createdAt: Date;
-
-    @ApiProperty()
-    updatedAt: Date;
+    channels?: ChannelDto[];
 }

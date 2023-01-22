@@ -12,12 +12,7 @@ export class ChannelService {
     create(channel : ChannelEntity) {
         return this.prisma.channel.create({data : channel});
     }
-
-    // async findChannelsByServerId(serverId : string) {
-    //   const channels = await this.prisma.channel.findMany({ where : { serverId }, include: { users : { include : { user : true}}}});
-    //   return channels;
-    // }
-
+    
     async findChannelsByServerId(serverId: string) {
       const channels = await this.prisma.server.findFirst({ where : { id : serverId }, include: { channels : true }});
       return channels;
