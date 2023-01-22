@@ -1,5 +1,5 @@
-import { Controller, Get, Body, Patch, Param, Request, Delete, BadRequestException, Logger, UseGuards, Post } from '@nestjs/common';
-import { ApiTags, ApiBadRequestResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { Controller, Get, Body, Patch, Param, Request, Delete, BadRequestException, Logger, UseGuards, Post, Put } from '@nestjs/common';
+import { ApiTags, ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -11,6 +11,8 @@ import { ChannelEntity } from './entities/channel.entity';
 import { ServerEntity } from '../servers/entities/server.entity';
 import { ChannelServerDto } from '../dtos/channels/channel.server.dto';
 import { ServerChannelEntity } from '../servers/entities/server.channels.entity';
+import { UpdateChannelDto } from '../dtos/channels/update.channel.dto';
+import { CreateChannelEntity } from './entities/create.channel.entity';
 
 @Controller('channels')
 @ApiTags('channels')
@@ -25,11 +27,11 @@ export class ChannelController {
     const result = new OperationResult<ChannelDto>();
     result.isSucceed = false;
     try {
-      const channelToCreate = this.mapper.map(channel, ChannelDto, ChannelEntity);
+      const channelToCreate = this.mapper.map(channel, ChannelDto, CreateChannelEntity);
       const createdChannel = await this.channelService.create(channelToCreate);
       if(createdChannel) {
         result.isSucceed = true;
-        result.result = this.mapper.map(createdChannel, ChannelEntity, ChannelDto);
+        result.result = this.mapper.map(createdChannel, CreateChannelEntity, ChannelDto);
       } else {
         throw new BadRequestException(errorConstant.serverNotCreated);
       }
@@ -99,6 +101,47 @@ export class ChannelController {
     } catch (error) {
         Logger.log(error);
         throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put(":channelId")
+  @ApiCreatedResponse({ type: UpdateChannelDto })
+  @ApiBadRequestResponse({ type : BadRequestException})
+  async update(@Param('channelId') channelId: string, @Body() updateChannelDto: UpdateChannelDto, @Request() req) {
+    const result = new OperationResult<UpdateChannelDto>();
+    result.isSucceed = false;
+    try {
+      const channelToUpdate = this.mapper.map(updateChannelDto, UpdateChannelDto, CreateChannelEntity)
+      const updatedChannel = await this.channelService.update(channelId, channelToUpdate);
+      if(updatedChannel) {
+        result.isSucceed = true;
+        result.result = this.mapper.map(updatedChannel, CreateChannelEntity, ChannelDto);
+      } else {
+        result.result = null;
+      }
+
+      return result;
+    } catch (error) {
+        Logger.log(error);
+        throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  @ApiOkResponse({ type: Boolean })
+  @ApiBadRequestResponse({type: BadRequestException})
+  async remove(@Request() req, @Param('id') id: string) {
+    const response = new OperationResult<boolean>();
+    response.isSucceed = false;
+    try {
+      response.isSucceed = true;
+      response.result = await this.channelService.remove(id, req.user.id);
+      return response;
+    } catch (error) {
+      Logger.log(error);
+      throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 

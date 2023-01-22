@@ -45,4 +45,13 @@ export class MessagesService {
   async update(messageId: string, messageEntity: MessageEntity) {
     return await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
   }
+
+  async remove(messageId: string, userId: string) {
+    const message = await this.prisma.message.findFirst({where: { id: messageId, userId : userId}});
+    if(message){
+      await this.prisma.message.delete({where : { id : messageId}});
+      return true;
+    }
+    return false;
+  }
 }

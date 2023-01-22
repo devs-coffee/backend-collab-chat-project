@@ -1,6 +1,6 @@
 import { Controller, Get, Body, Patch, Param, Request, Delete, BadRequestException, Logger, UseGuards, Post, Put } from '@nestjs/common';
 import { MessagesService } from './messages.service';
-import { ApiTags, ApiBadRequestResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiTags, ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -81,4 +81,20 @@ export class MessagesController {
       }
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Delete(':id')
+    @ApiOkResponse({ type: Boolean })
+    @ApiBadRequestResponse({type: BadRequestException})
+    async remove(@Request() req, @Param('id') id: string) {
+      const response = new OperationResult<boolean>();
+      response.isSucceed = false;
+      try {
+        response.isSucceed = true;
+        response.result = await this.messagesService.remove(id, req.user.id);
+        return response;
+      } catch (error) {
+        Logger.log(error);
+        throw new BadRequestException(errorConstant.errorOccured);
+      }
+    }
 }
