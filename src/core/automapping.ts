@@ -1,5 +1,5 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import { createMap, Mapper } from '@automapper/core';
+import { createMap, forMember, ignore, mapFrom, Mapper, mapWith } from '@automapper/core';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/users/create-user.dto';
 import { UserEntity } from '../users/entities/user.entity';
@@ -9,6 +9,18 @@ import { ServerDto } from '../dtos/servers/server.dto';
 import { ServerEntity } from '../servers/entities/server.entity';
 import { UpdateServerDto } from '../dtos/servers/update-server.dto';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
+import { MessageEntity } from '../messages/entities/message.entity';
+import { MessageDto } from '../dtos/messages/create-message.dto';
+import { ChannelEntity } from '../channels/entities/channel.entity';
+import { ChannelDto } from '../dtos/channels/channel.dto';
+import { UserChannelEntity } from '../channels/entities/userChannel.entity';
+import { UserChannelDto } from '../dtos/channels/channel.user.dto';
+import { MessageCreateEntity } from '../messages/entities/message.create.entity';
+import { ChannelServerDto } from '../dtos/channels/channel.server.dto';
+import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
+import { ServerChannelEntity } from '../servers/entities/server.channels.entity';
+import { UpdateChannelDto } from '../dtos/channels/update.channel.dto';
+import { CreateChannelEntity } from '../channels/entities/create.channel.entity';
 
 @Injectable()
 export class AutoMapping extends AutomapperProfile {
@@ -24,7 +36,7 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, UserEntity, LoginSignupResponse);
             createMap(mapper, CreateUserDto, UserDto);
             createMap(mapper, UpdateUserDto, UserEntity);
-
+            createMap(mapper, UserChannelEntity, UserEntity, forMember(u => u, mapFrom(ue => ue.user)))
             // will map the user without passwordConfirm, necessary to be able to create a user
             createMap(mapper, CreateUserDto, CreateUserDto);
 
@@ -33,6 +45,40 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, ServerEntity, ServerDto);
             createMap(mapper, ServerDto, UpdateServerDto);
             createMap(mapper, UpdateServerDto, ServerDto);
+
+            // messages
+            createMap(mapper, MessageDto, MessageEntity);
+            createMap(mapper, MessageEntity, MessageDto);
+            createMap(mapper, MessageCreateEntity, MessageDto, forMember(
+                (destination) => destination.user,
+                mapWith(UserDto, UserEntity, (source) => source.user))
+            );
+            createMap(mapper, UpdateMessageDto, MessageEntity);
+
+            // channels
+            createMap(mapper, ChannelEntity, ChannelDto, forMember(
+                (destination) => destination.users,
+                mapWith(UserChannelDto, UserChannelEntity, (source) => source.users))
+            );
+
+            createMap(mapper, UserChannelDto, UserChannelEntity);
+
+            createMap(mapper, UserChannelEntity, UserChannelDto, forMember(
+                (destination) => destination.user,
+                mapWith(UserDto, UserEntity, (source) => source.user))
+            );
+            createMap(mapper, ChannelDto, CreateChannelEntity);
+            createMap(mapper, CreateChannelEntity, ChannelDto);
+
+            createMap(mapper, UpdateServerDto, ServerEntity);
+
+            createMap(mapper, ServerChannelEntity, ChannelServerDto, forMember(
+                (destination) => destination.channels,
+                mapWith(ChannelDto, ChannelEntity, (source) => source.channels))
+            );
+            createMap(mapper, UpdateChannelDto, CreateChannelEntity);
+            createMap(mapper, CreateChannelEntity, UpdateChannelDto);
+
         };
     }
 }

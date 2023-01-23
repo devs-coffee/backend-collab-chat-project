@@ -44,27 +44,29 @@ export class ServerService {
   async update(id: string, updateServerDto: UpdateServerDto) {
     const userServer = await this.prisma.userServer.findFirst({ where: { serverId: id, userId : updateServerDto.userId }});
     if(userServer.isAdmin){
-        return this.prisma.server.update({
+      const serverToUpdate = this.mapper.map(updateServerDto, UpdateServerDto, ServerEntity);  
+      return this.prisma.server.update({
             where: { id },
-            data: updateServerDto,
+            data: serverToUpdate,
         });
     }
     return new Error(errorConstant.noUserRights);
   }
 
   async remove(id: string, userId: string) {
-      const userServer = await this.prisma.userServer.findFirst({ where: { serverId: id, userId : userId }});
-      if(!userServer){
+    const userServer = await this.prisma.userServer.findFirst({ where: { serverId: id, userId : userId }});
+    if(!userServer){
+      throw new Error(errorConstant.itemNotExisting);
+    }
+    if(userServer && userServer.isAdmin){
+        // remove server & on cascade userServer
+        const deleted = await this.prisma.server.delete({ where: { id } });
+        console.log(deleted)
+        if(deleted){
+          return true;
+        }
         throw new Error(errorConstant.itemNotExisting);
-      }
-      if(userServer && userServer.isAdmin){
-         // remove server & on cascade userServer
-          const deleted = await this.prisma.server.delete({ where: { id } });
-          if(deleted){
-            return true;
-          }
-          throw new Error(errorConstant.itemNotExisting);
-      }
-      return false;
+    }
+    return false;
   }
 }

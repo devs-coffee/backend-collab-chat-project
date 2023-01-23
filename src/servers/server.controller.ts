@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, Request, BadRequestException, Logger, UseGuards, Post } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, Request, BadRequestException, Logger, UseGuards, Post, Put } from '@nestjs/common';
 import { ApiTags, ApiOkResponse, ApiBadRequestResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
 import { InjectMapper } from '@automapper/nestjs';
@@ -9,11 +9,14 @@ import { ServerService } from './server.service';
 import { ServerDto } from '../dtos/servers/server.dto';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { UpdateServerDto } from '../dtos/servers/update-server.dto';
+import { UsersService } from '../users/users.service';
+import { UserDto } from '../dtos/users/user.dto';
+import { UserEntity } from '../users/entities/user.entity';
 
 @Controller('servers')
 @ApiTags('servers')
 export class ServerController {
-  constructor(private readonly serverService: ServerService, @InjectMapper() private readonly mapper: Mapper) {}
+  constructor(private readonly serverService: ServerService, @InjectMapper() private readonly mapper: Mapper, private readonly userService: UsersService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -24,13 +27,26 @@ export class ServerController {
     response.isSucceed = false;
     try {
       const servers = await this.serverService.findAll(req.user.id);
-      if(servers && servers.length > 0) {
-        response.isSucceed = true;
-        response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
-      } else {
-        response.result = [];
-      }
+      response.isSucceed = true;
+      response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
+      return response;
+    } catch (error) {
+      Logger.log(error);
+      throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
 
+  @UseGuards(JwtAuthGuard)
+  @Get(":serverId/users")
+  @ApiOkResponse({ type: UserDto, isArray: true })
+  @ApiBadRequestResponse({type: BadRequestException })
+  async GetAllUserByServerId(@Request() req, @Param('serverId') serverId: string) : Promise<OperationResult<UserDto[]>> {
+    const response = new OperationResult<UserDto[]>();
+    response.isSucceed = false;
+    try {
+      const users = await this.userService.findAllUsersByServerId(serverId);
+      response.isSucceed = true;
+      response.result = this.mapper.mapArray(users, UserEntity, UserDto);
       return response;
     } catch (error) {
       Logger.log(error);
@@ -42,11 +58,11 @@ export class ServerController {
   @Post()
   @ApiCreatedResponse({ type: ServerDto })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async createServer(@Body() server: ServerDto) : Promise<OperationResult<ServerDto>> {
+  async createServer(@Body() server: ServerDto, @Request() req) : Promise<OperationResult<ServerDto>> {
     const result = new OperationResult<ServerDto>();
     result.isSucceed = false;
     try {
-      const createdServer = await this.serverService.create(server);
+      const createdServer = await this.serverService.create({...server, userId: req.user.id});
       if(createdServer) {
         result.isSucceed = true;
         result.result = this.mapper.map(createdServer, ServerEntity, ServerDto);
@@ -69,12 +85,8 @@ export class ServerController {
     response.isSucceed = false;
     try {
       const server = await this.serverService.findOne(id);
-      if(server) {
-        response.isSucceed = true;
-        response.result = this.mapper.map(server, ServerEntity, ServerDto);
-      } else {
-        response.result = null;
-      }
+      response.isSucceed = true;
+      response.result = this.mapper.map(server, ServerEntity, ServerDto);
       return response;
     } catch (error) {
       Logger.log(error);
@@ -83,13 +95,14 @@ export class ServerController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Put(':id')
   @ApiOkResponse({ type: UpdateServerDto })
   @ApiBadRequestResponse({type: BadRequestException})
-  async update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto) {
+  async update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto, @Request() req) {
     const result = new OperationResult<UpdateServerDto>();
     result.isSucceed = false;
     try {
+      updateServerDto.userId = req.user.id;
       const updatedServer = await this.serverService.update(id, updateServerDto);
       if(updatedServer) {
         result.isSucceed = true;

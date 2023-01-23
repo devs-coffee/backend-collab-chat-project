@@ -1,22 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { AutomapperModule } from '@automapper/nestjs';
+import { UserChannelDto } from './channel.user.dto';
 
-export class ServerDto {
+export class ChannelDto {
     @AutoMap()
     @ApiProperty()
     id?: string;
 
     @AutoMap()
     @ApiProperty()
-    name: string;
+    title: string;
 
     @AutoMap()
     @ApiProperty()
-    picture?: string;
+    serverId: string;
 
     @AutoMap()
-    isPrivate: boolean;
-
-    userId: string;
+    @ApiProperty()
+    users?: UserChannelDto[]
 }
