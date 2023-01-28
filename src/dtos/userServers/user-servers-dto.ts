@@ -6,11 +6,14 @@ export class UserServerDto {
     id: string;
 
     @ApiProperty()
+    @AutoMap()
     userId: string;
 
     @ApiProperty()
+    @AutoMap()
     isAdmin: boolean;
 
     @ApiProperty()
+    @AutoMap()
     serverId: string;
 }

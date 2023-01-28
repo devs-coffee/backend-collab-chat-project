@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, BadRequestException, Logger, UseGuards } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, BadRequestException, Logger, UseGuards, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { ApiTags, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
@@ -54,6 +54,25 @@ export class UsersController {
         response.result = null;
       }
 
+      return response;
+    } catch (error) {
+      Logger.log(error);
+      throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("searchUser")
+  @ApiOkResponse({ type: UserDto, isArray: true })
+  @ApiBadRequestResponse({type: BadRequestException })
+  async search(@Query("name") name) : Promise<OperationResult<UserDto[]>> {
+    const response = new OperationResult<UserDto[]>();
+    response.isSucceed = false;
+    try {
+      console.log(name)
+      const users = await this.usersService.searchUser(name.toLowerCase());
+      response.isSucceed = true;
+      response.result = this.mapper.mapArray(users, UserEntity, UserDto);
       return response;
     } catch (error) {
       Logger.log(error);

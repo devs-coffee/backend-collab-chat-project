@@ -21,6 +21,8 @@ import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
 import { ServerChannelEntity } from '../servers/entities/server.channels.entity';
 import { UpdateChannelDto } from '../dtos/channels/update.channel.dto';
 import { CreateChannelEntity } from '../channels/entities/create.channel.entity';
+import { UserServerDto } from '../dtos/userServers/user-servers-dto';
+import { UserServerEntity } from '../servers/entities/user-server-entity';
 
 @Injectable()
 export class AutoMapping extends AutomapperProfile {
@@ -79,6 +81,7 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, UpdateChannelDto, CreateChannelEntity);
             createMap(mapper, CreateChannelEntity, UpdateChannelDto);
 
+            createMap(mapper, UserServerDto, UserServerEntity);
         };
     }
 }
