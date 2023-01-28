@@ -71,7 +71,7 @@ export class ServerService {
   }
 
   async search(name: string){
-    const servers = await this.prisma.server.findMany({ where : { name : {contains: name.toLowerCase()}}, orderBy : { name : 'desc'}});
+    const servers = await this.prisma.server.findMany({ where : { name : {contains: name.toLowerCase()}}, orderBy : { name : 'asc'}});
     return servers;
   }
 

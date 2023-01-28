@@ -58,7 +58,7 @@ export class UsersService {
   }
 
   async searchUser(name: string){
-    const users = await this.prisma.user.findMany({ where : { pseudo : {contains: name.toLowerCase()}}, orderBy : { pseudo : 'desc'}});
+    const users = await this.prisma.user.findMany({ where : { pseudo : {contains: name.toLowerCase()}}, orderBy : { pseudo : 'asc'}});
     return users;
   }
 }
