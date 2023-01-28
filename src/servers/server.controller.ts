@@ -104,9 +104,6 @@ export class ServerController {
     const result = new OperationResult<boolean>();
     result.isSucceed = false;
     try {
-      if(server.userId !== req.user.id){
-        throw new BadRequestException(errorConstant.noUserRights);
-      }
       const serverToJoinOrLeave = this.mapper.map(server, UserServerDto, UserServerEntity);
       const joined = await this.serverService.joinOrLeave(serverToJoinOrLeave);
       result.isSucceed = true;
