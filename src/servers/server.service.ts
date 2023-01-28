@@ -62,7 +62,6 @@ export class ServerService {
     if(userServer && userServer.isAdmin){
         // remove server & on cascade userServer
         const deleted = await this.prisma.server.delete({ where: { id } });
-        console.log(deleted)
         if(deleted){
           return true;
         }
@@ -77,9 +76,7 @@ export class ServerService {
   }
 
   async joinOrLeave(server: UserServerEntity) {
-    console.log(server)
     const hasAlreadyJoined = await this.prisma.userServer.findFirst({where : {AND : [{ serverId : server.serverId}, {userId : server.userId}]}});
-    console.log(hasAlreadyJoined)
     if(hasAlreadyJoined !== null){
       await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}})
       return false;

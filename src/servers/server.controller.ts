@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, Request, BadRequestException, Logger, UseGuards, Post, Put } from '@nestjs/common';
+import { Controller, Get, Body, Param, Delete, Request, BadRequestException, Logger, UseGuards, Post, Put, Query } from '@nestjs/common';
 import { ApiTags, ApiOkResponse, ApiBadRequestResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
 import { InjectMapper } from '@automapper/nestjs';
