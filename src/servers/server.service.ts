@@ -7,6 +7,7 @@ import { ServerEntity } from './entities/server.entity';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { errorConstant } from '../constants/errors.constants';
+import { UserServerEntity } from './entities/user-server-entity';
 
 @Injectable()
 export class ServerService {
@@ -61,11 +62,28 @@ export class ServerService {
     if(userServer && userServer.isAdmin){
         // remove server & on cascade userServer
         const deleted = await this.prisma.server.delete({ where: { id } });
-        console.log(deleted)
         if(deleted){
           return true;
         }
         throw new Error(errorConstant.itemNotExisting);
+    }
+    return false;
+  }
+
+  async search(name: string){
+    const servers = await this.prisma.server.findMany({ where : { name : {contains: name.toLowerCase()}}, orderBy : { name : 'asc'}});
+    return servers;
+  }
+
+  async joinOrLeave(server: UserServerEntity) {
+    const hasAlreadyJoined = await this.prisma.userServer.findFirst({where : {AND : [{ serverId : server.serverId}, {userId : server.userId}]}});
+    if(hasAlreadyJoined !== null){
+      await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}})
+      return false;
+    }
+    const joinedServer = await this.prisma.userServer.create({data: server});
+    if(joinedServer){
+      return true;
     }
     return false;
   }

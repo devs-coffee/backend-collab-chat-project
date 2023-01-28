@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, Request, BadRequestException, Logger, UseGuards, Post, Put } from '@nestjs/common';
+import { Controller, Get, Body, Param, Delete, Request, BadRequestException, Logger, UseGuards, Post, Put, Query } from '@nestjs/common';
 import { ApiTags, ApiOkResponse, ApiBadRequestResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
 import { InjectMapper } from '@automapper/nestjs';
@@ -12,6 +12,8 @@ import { UpdateServerDto } from '../dtos/servers/update-server.dto';
 import { UsersService } from '../users/users.service';
 import { UserDto } from '../dtos/users/user.dto';
 import { UserEntity } from '../users/entities/user.entity';
+import { UserServerDto } from '../dtos/userServers/user-servers-dto';
+import { UserServerEntity } from './entities/user-server-entity';
 
 @Controller('servers')
 @ApiTags('servers')
@@ -55,6 +57,24 @@ export class ServerController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get("search")
+  @ApiOkResponse({ type: ServerDto, isArray: true })
+  @ApiBadRequestResponse({type: BadRequestException })
+  async Search(@Query("name") name) : Promise<OperationResult<ServerDto[]>> {
+    const response = new OperationResult<ServerDto[]>();
+    response.isSucceed = false;
+    try {
+      const servers = await this.serverService.search(name.toLowerCase());
+      response.isSucceed = true;
+      response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
+      return response;
+    } catch (error) {
+      Logger.log(error);
+      throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiCreatedResponse({ type: ServerDto })
   @ApiBadRequestResponse({ type : BadRequestException})
@@ -69,6 +89,25 @@ export class ServerController {
       } else {
         throw new BadRequestException(errorConstant.serverNotCreated);
       }
+      return result;
+    } catch (error) {
+        Logger.log(error);
+        throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("join")
+  @ApiCreatedResponse({ type: ServerDto })
+  @ApiBadRequestResponse({ type : BadRequestException})
+  async joinOrLeave(@Body() server: UserServerDto, @Request() req) : Promise<OperationResult<boolean>> {
+    const result = new OperationResult<boolean>();
+    result.isSucceed = false;
+    try {
+      const serverToJoinOrLeave = this.mapper.map(server, UserServerDto, UserServerEntity);
+      const joined = await this.serverService.joinOrLeave(serverToJoinOrLeave);
+      result.isSucceed = true;
+      result.result = joined;
       return result;
     } catch (error) {
         Logger.log(error);
