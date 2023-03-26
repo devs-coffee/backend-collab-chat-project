@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, BadRequestException, Logger, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, BadRequestException, Logger, UseGuards, Query, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { ApiTags, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
@@ -80,7 +80,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Put(':id')
   @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
