@@ -8,4 +8,7 @@ export class UpdateServerDto extends PartialType(ServerDto) {
 
     @AutoMap()
     picture?: string;
+
+    @AutoMap()
+    categories?: string[];
 }
