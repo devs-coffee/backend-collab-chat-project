@@ -28,6 +28,7 @@ model Server {
   updatedAt DateTime     @updatedAt
   users     UserServer[]
   channels  Channel[]
+  categories String[]
 }
 
 model UserServer {

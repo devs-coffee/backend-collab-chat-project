@@ -43,8 +43,8 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, CreateUserDto, CreateUserDto);
 
             // servers
-            createMap(mapper, ServerDto, ServerEntity);
-            createMap(mapper, ServerEntity, ServerDto);
+            createMap(mapper, ServerDto, ServerEntity, forMember(server => server.categories, mapFrom(se => se.categories)));
+            createMap(mapper, ServerEntity, ServerDto, forMember(server => server.categories, mapFrom(se => se.categories)));
             createMap(mapper, ServerDto, UpdateServerDto);
             createMap(mapper, UpdateServerDto, ServerDto);
 
