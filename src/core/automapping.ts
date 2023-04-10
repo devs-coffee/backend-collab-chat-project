@@ -43,11 +43,11 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, CreateUserDto, CreateUserDto);
 
             // servers
-            createMap(mapper, ServerDto, ServerEntity);
-            createMap(mapper, ServerEntity, ServerDto);
-            createMap(mapper, ServerDto, UpdateServerDto);
-            createMap(mapper, UpdateServerDto, ServerDto);
-
+            createMap(mapper, ServerDto, ServerEntity, forMember(server => server.categories, mapFrom(se => se.categories)));
+            createMap(mapper, ServerEntity, ServerDto, forMember(server => server.categories, mapFrom(se => se.categories)));
+            createMap(mapper, ServerDto, UpdateServerDto, forMember(server => server.categories, mapFrom(se => se.categories)));
+            createMap(mapper, UpdateServerDto, ServerDto, forMember(server => server.categories, mapFrom(se => se.categories)));
+            createMap(mapper, UpdateServerDto, ServerEntity, forMember(server => server.categories, mapFrom(se => se.categories)));
             // messages
             createMap(mapper, MessageDto, MessageEntity);
             createMap(mapper, MessageEntity, MessageDto);
@@ -71,8 +71,6 @@ export class AutoMapping extends AutomapperProfile {
             );
             createMap(mapper, ChannelDto, CreateChannelEntity);
             createMap(mapper, CreateChannelEntity, ChannelDto);
-
-            createMap(mapper, UpdateServerDto, ServerEntity);
 
             createMap(mapper, ServerChannelEntity, ChannelServerDto, forMember(
                 (destination) => destination.channels,

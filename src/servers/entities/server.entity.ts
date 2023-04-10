@@ -1,7 +1,6 @@
 import { Server } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { ChannelEntity } from 'src/channels/entities/channel.entity';
 
 export class ServerEntity implements Server {
     @AutoMap()
@@ -15,6 +14,10 @@ export class ServerEntity implements Server {
     @AutoMap()
     @ApiProperty({ required: false, nullable: true})
     picture: string;
+
+    @AutoMap()
+    @ApiProperty()
+    categories: string[];
 
     @ApiProperty()
     createdAt: Date;
