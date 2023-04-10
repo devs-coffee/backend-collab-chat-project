@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { AutomapperModule } from '@automapper/nestjs';
 
 export class ServerDto {
     @AutoMap()
@@ -14,6 +13,10 @@ export class ServerDto {
     @AutoMap()
     @ApiProperty()
     picture?: string;
+
+    @AutoMap()
+    @ApiProperty()
+    categories: string[];
 
     @AutoMap()
     isPrivate: boolean;
