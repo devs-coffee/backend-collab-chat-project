@@ -60,11 +60,11 @@ export class ServerController {
   @Get("search")
   @ApiOkResponse({ type: ServerDto, isArray: true })
   @ApiBadRequestResponse({type: BadRequestException })
-  async Search(@Query("name") name) : Promise<OperationResult<ServerDto[]>> {
+  async Search(@Query("keyword") keyword: string) : Promise<OperationResult<ServerDto[]>> {
     const response = new OperationResult<ServerDto[]>();
     response.isSucceed = false;
     try {
-      const servers = await this.serverService.search(name.toLowerCase());
+      const servers = await this.serverService.search(keyword.toLowerCase());
       response.isSucceed = true;
       response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
       return response;
