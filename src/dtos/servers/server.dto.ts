@@ -22,4 +22,7 @@ export class ServerDto {
     isPrivate: boolean;
 
     userId: string;
+
+    @AutoMap()
+    isCurrentUserAdmin: boolean = false;
 }
