@@ -31,15 +31,27 @@ export class ServerService {
     return created;
   }
 
-  findAll(userId) {
+  async findAll(userId) {
     if(userId){
-        return this.prisma.server.findMany({where: { users : { some :{ userId: userId} } }});
+        const servers = await this.prisma.server.findMany({where: { users : { some :{ userId: userId} } }});
+        const allUserServers = await this.prisma.userServer.findMany({ where : { userId : userId}});
+        const serverEntities = this.mapper.mapArray(servers, ServerEntity, ServerEntity);
+        serverEntities.forEach(server => {
+          allUserServers.forEach(userServer => {
+            server.isCurrentUserAdmin = userServer.isAdmin;
+          })
+        })
+        return serverEntities;
     }
     return null;
   }
 
-  findOne(id: string) {
-    return this.prisma.server.findUnique({ where: { id }});
+  async findOne(id: string, userId: string) {
+    const server = await this.prisma.server.findFirst({ where: { id }});
+    const userServer = await this.prisma.userServer.findFirst({ where : { serverId: id ,  userId : userId}});
+    const serverEntity = this.mapper.map(server, ServerEntity, ServerEntity)
+    serverEntity.isCurrentUserAdmin  = userServer ? userServer.isAdmin : false;
+    return serverEntity;
   }
 
   async update(id: string, updateServerDto: UpdateServerDto) {

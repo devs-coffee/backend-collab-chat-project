@@ -119,11 +119,11 @@ export class ServerController {
   @Get(':id')
   @ApiOkResponse({ type: ServerDto })
   @ApiBadRequestResponse({type: BadRequestException})
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @Request() req) {
     const response = new OperationResult<ServerDto>();
     response.isSucceed = false;
     try {
-      const server = await this.serverService.findOne(id);
+      const server = await this.serverService.findOne(id, req.user.id);
       response.isSucceed = true;
       response.result = this.mapper.map(server, ServerEntity, ServerDto);
       return response;

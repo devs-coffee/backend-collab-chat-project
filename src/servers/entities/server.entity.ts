@@ -24,4 +24,7 @@ export class ServerEntity implements Server {
 
     @ApiProperty()
     updatedAt: Date;
+
+    @AutoMap()
+    isCurrentUserAdmin?: boolean = false;
 }
