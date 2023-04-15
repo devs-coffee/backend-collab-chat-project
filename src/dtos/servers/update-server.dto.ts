@@ -11,4 +11,7 @@ export class UpdateServerDto extends PartialType(ServerDto) {
 
     @AutoMap()
     categories?: string[];
+
+    @AutoMap()
+    isCurrentUserAdmin?: boolean;
 }
