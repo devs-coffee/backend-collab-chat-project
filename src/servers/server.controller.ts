@@ -98,13 +98,18 @@ export class ServerController {
 
   @UseGuards(JwtAuthGuard)
   @Post("join")
-  @ApiCreatedResponse({ type: ServerDto })
+  @ApiCreatedResponse({ type: Boolean })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async joinOrLeave(@Body() server: UserServerDto, @Request() req) : Promise<OperationResult<boolean>> {
+  async joinOrLeave(@Body() joinRequest: JoinRequestDto, @Request() req) : Promise<OperationResult<boolean>> {
     const result = new OperationResult<boolean>();
     result.isSucceed = false;
+    const dto = {
+      ...joinRequest,
+      userId: req.user.id,
+      isAdmin: false
+    }
     try {
-      const serverToJoinOrLeave = this.mapper.map(server, UserServerDto, UserServerEntity);
+      const serverToJoinOrLeave = this.mapper.map(dto, UserServerDto, UserServerEntity);
       const joined = await this.serverService.joinOrLeave(serverToJoinOrLeave);
       result.isSucceed = true;
       result.result = joined;
