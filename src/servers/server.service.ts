@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateServerDto } from '../dtos/servers/update-server.dto';
 import { ServerDto } from '../dtos/servers/server.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -84,14 +84,19 @@ export class ServerService {
     return false;
   }
 
-  async search(name: string){
-    const servers = await this.prisma.server.findMany({ where : {OR : [{ name : {contains: name.toLowerCase()}}, {categories: {hasSome: name.toLowerCase()}}]}, orderBy : { name : 'asc'}});
+  async search(keyword: string){
+    const servers = await this.prisma.server.findMany({ where : {OR : [{ name : {contains: keyword, mode: 'insensitive'}}, {categories: {hasSome: keyword.toLowerCase()}}]}, orderBy : { name : 'asc'}});
     return servers;
   }
 
   async joinOrLeave(server: UserServerEntity) {
     const hasAlreadyJoined = await this.prisma.userServer.findFirst({where : {AND : [{ serverId : server.serverId}, {userId : server.userId}]}});
     if(hasAlreadyJoined !== null){
+      //! vérifier que user ne soit pas le dernier admin ?
+      const serverAdmins = await this.prisma.userServer.findMany({where: {AND : [{ serverId: server.serverId}, {isAdmin: true}]}});
+      if(serverAdmins.length < 2 && serverAdmins[0].userId === server.userId) {
+        throw new BadRequestException(errorConstant.lastAdminCannotLeave);
+      }
       await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}})
       return false;
     }
