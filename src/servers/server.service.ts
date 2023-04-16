@@ -38,9 +38,11 @@ export class ServerService {
         const serverEntities = this.mapper.mapArray(servers, ServerEntity, ServerEntity);
         serverEntities.forEach(server => {
           allUserServers.forEach(userServer => {
-            server.isCurrentUserAdmin = userServer.isAdmin;
-          })
-        })
+            if(server.id === userServer.serverId){
+              server.isCurrentUserAdmin = userServer.isAdmin;
+            }
+          });
+        });
         return serverEntities;
     }
     return null;
