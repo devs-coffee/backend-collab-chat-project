@@ -115,10 +115,10 @@ export class ServerController {
       result.result = joined;
       return result;
     } catch (error) {
-        error instanceof BadRequestException ? 
-          () =>{throw error}
-          :
-          () =>{throw new BadRequestException(errorConstant.errorOccured)};
+        if(error instanceof BadRequestException) {
+          throw error;
+        }
+        throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 
