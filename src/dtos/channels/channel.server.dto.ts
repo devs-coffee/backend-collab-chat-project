@@ -1,7 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { UserChannelDto } from './channel.user.dto';
-import { ServerDto } from '../servers/server.dto';
+import { ApiProperty } from '@nestjs/swagger';
 import { ChannelDto } from './channel.dto';
 
 export class ChannelServerDto {

@@ -1,7 +1,6 @@
-import { Channel, Message, Server, User, UserChannel } from '@prisma/client';
-import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { UserChannelEntity } from './userChannel.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Channel } from '@prisma/client';
 
 export class CreateChannelEntity implements Channel {
     @AutoMap()

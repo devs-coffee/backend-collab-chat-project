@@ -11,6 +11,7 @@ import { ServersModule } from './servers/servers.module';
 import { EventsModule } from './events/events.module';
 import { MessagesModule } from './messages/messages.module';
 import { ChannelModule } from './channels/channel.module';
+
 @Module({
   imports: [PrismaModule, UsersModule, MessagesModule, ChannelModule, AuthenticationModule, ServersModule, EventsModule, AutomapperModule.forRoot({
     strategyInitializer: classes(),

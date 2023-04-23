@@ -1,17 +1,17 @@
-import { Controller, Get, Body, Patch, Param, Request, Delete, BadRequestException, Logger, UseGuards, Post, Put } from '@nestjs/common';
-import { ApiTags, ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
-import { OperationResult } from '../core/OperationResult';
-import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { errorConstant } from '../constants/errors.constants';
+import { InjectMapper } from '@automapper/nestjs';
+import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
-import { ChannelService } from './channel.service';
+import { errorConstant } from '../constants/errors.constants';
+import { OperationResult } from '../core/OperationResult';
 import { ChannelDto } from '../dtos/channels/channel.dto';
-import { ChannelEntity } from './entities/channel.entity';
-import { ServerEntity } from '../servers/entities/server.entity';
 import { ChannelServerDto } from '../dtos/channels/channel.server.dto';
-import { ServerChannelEntity } from '../servers/entities/server.channels.entity';
 import { UpdateChannelDto } from '../dtos/channels/update.channel.dto';
+import { ServerChannelEntity } from '../servers/entities/server.channels.entity';
+import { ServerEntity } from '../servers/entities/server.entity';
+import { ChannelService } from './channel.service';
+import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
 
 @Controller('channels')
