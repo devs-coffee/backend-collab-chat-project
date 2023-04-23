@@ -1,12 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { MessageDto } from '../dtos/messages/create-message.dto';
+import { InjectMapper } from '@automapper/nestjs';
+import { Injectable } from '@nestjs/common';
 import { ChannelService } from '../channels/channel.service';
 import { ChannelEntity } from '../channels/entities/channel.entity';
+import { MessageDto } from '../dtos/messages/create-message.dto';
+import { PrismaService } from '../prisma/prisma.service';
 import { MessageEntity } from './entities/message.entity';
-import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
 
 @Injectable()
 export class MessagesService {

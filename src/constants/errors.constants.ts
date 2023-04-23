@@ -7,5 +7,6 @@ export const errorConstant = {
     noUserRights: "Vous n'avez pas les droits pouur mettre à jour le serveur.",
     itemNotExisting: "L'item n'existe pas.",
     cannotGetUserChannels : "Nous n'avons pas pu récupérer les channels, veuillez réessayer plus tard.",
-    lastAdminCannotLeave : "Vous êtes le dernier admin. Vous devez nommer un autre admin ou supprimer le serveur"
+    lastAdminCannotLeave : "Vous êtes le dernier admin. Vous devez nommer un autre admin ou supprimer le serveur",
+    pseudoUnavailable: "Ce pseudo est déjà utilisé"
   };

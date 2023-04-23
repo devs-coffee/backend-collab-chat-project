@@ -1,7 +1,6 @@
-import { Message, Server, User } from '@prisma/client';
-import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { UserEntity } from '../../users/entities/user.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Message } from '@prisma/client';
 
 export class MessageEntity implements Message {
     @AutoMap()

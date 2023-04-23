@@ -1,14 +1,15 @@
-import { Controller, Get, Body, Patch, Param, Delete, BadRequestException, Logger, UseGuards, Query, Put } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UpdateUserDto } from '../dtos/users/update-user.dto';
-import { ApiTags, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
-import { OperationResult } from '../core/OperationResult';
-import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
+import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Put, Query, UseGuards } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
+import { errorConstant } from '../constants/errors.constants';
+import { OperationResult } from '../core/OperationResult';
+import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { UserDto } from '../dtos/users/user.dto';
 import { UserEntity } from './entities/user.entity';
-import { errorConstant } from '../constants/errors.constants';
-import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
+import { UsersService } from './users.service';
 
 @Controller('users')
 @ApiTags('users')
@@ -98,6 +99,9 @@ export class UsersController {
       return result;
     } catch (error) {
         Logger.log(error);
+        if(error instanceof PrismaClientKnownRequestError  && error.message.includes("Unique constraint failed on the fields: (`pseudo`)")) {
+          throw new BadRequestException(errorConstant.pseudoUnavailable);
+        }
         throw new BadRequestException(errorConstant.errorOccured);
     }
   }

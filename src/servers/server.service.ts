@@ -31,7 +31,7 @@ export class ServerService {
     return created;
   }
 
-  async findAll(userId) {
+  async findAll(userId:string) {
     if(userId){
         const servers = await this.prisma.server.findMany({where: { users : { some :{ userId: userId} } }});
         const allUserServers = await this.prisma.userServer.findMany({ where : { userId : userId}});
@@ -92,7 +92,6 @@ export class ServerService {
   async joinOrLeave(server: UserServerEntity) {
     const hasAlreadyJoined = await this.prisma.userServer.findFirst({where : {AND : [{ serverId : server.serverId}, {userId : server.userId}]}});
     if(hasAlreadyJoined !== null){
-      //! vérifier que user ne soit pas le dernier admin ?
       const serverAdmins = await this.prisma.userServer.findMany({where: {AND : [{ serverId: server.serverId}, {isAdmin: true}]}});
       if(serverAdmins.length < 2 && serverAdmins[0].userId === server.userId) {
         throw new BadRequestException(errorConstant.lastAdminCannotLeave);
