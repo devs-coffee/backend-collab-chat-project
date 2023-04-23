@@ -11,6 +11,7 @@ import { Mapper } from '@automapper/core';
 import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 import { UserEntity } from '../users/entities/user.entity';
 import { UserDto } from '../dtos/users/user.dto';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -54,6 +55,9 @@ export class AuthenticationController {
         Logger.log(error);
         if(error.message === errorConstant.passwordNotMatching){
           throw new BadRequestException(error.message);
+        }
+        if(error instanceof PrismaClientKnownRequestError  && error.message.includes("Unique constraint failed on the fields: (`pseudo`)")) {
+          throw new BadRequestException(errorConstant.pseudoUnavailable);
         }
         throw new BadRequestException(errorConstant.errorOccured);
     }
