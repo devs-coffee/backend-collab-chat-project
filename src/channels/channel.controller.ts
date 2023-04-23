@@ -13,7 +13,7 @@ import { ServerEntity } from '../servers/entities/server.entity';
 import { ChannelService } from './channel.service';
 import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
-import { UserChannelDto } from 'src/dtos/channels/channel.user.dto';
+import { UserChannelDto } from 'src/dtos/userChannels/user-channel-dto';
 import { UserChannelEntity } from './entities/userChannel.entity';
 
 @Controller('channels')

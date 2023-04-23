@@ -14,7 +14,8 @@ import { MessageDto } from '../dtos/messages/create-message.dto';
 import { ChannelEntity } from '../channels/entities/channel.entity';
 import { ChannelDto } from '../dtos/channels/channel.dto';
 import { UserChannelEntity } from '../channels/entities/userChannel.entity';
-import { UserChannelDto } from '../dtos/channels/channel.user.dto';
+import { UserPrivateChannelEntity } from '../channels/entities/userPrivateChannel.entity';
+import { UserChannelDto } from '../dtos/userChannels/user-channel-dto';
 import { MessageCreateEntity } from '../messages/entities/message.create.entity';
 import { ChannelServerDto } from '../dtos/channels/channel.server.dto';
 import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
@@ -38,7 +39,7 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, UserEntity, LoginSignupResponse);
             createMap(mapper, CreateUserDto, UserDto);
             createMap(mapper, UpdateUserDto, UserEntity);
-            createMap(mapper, UserChannelEntity, UserEntity, forMember(u => u, mapFrom(ue => ue.user)))
+            createMap(mapper, UserChannelEntity, UserEntity)
             // will map the user without passwordConfirm, necessary to be able to create a user
             createMap(mapper, CreateUserDto, CreateUserDto);
 
@@ -67,7 +68,7 @@ export class AutoMapping extends AutomapperProfile {
 
             createMap(mapper, UserChannelDto, UserChannelEntity);
 
-            createMap(mapper, UserChannelEntity, UserChannelDto, forMember(
+            createMap(mapper, UserPrivateChannelEntity, UserChannelDto, forMember(
                 (destination) => destination.user,
                 mapWith(UserDto, UserEntity, (source) => source.user))
             );
