@@ -99,7 +99,6 @@ export class UsersController {
       return result;
     } catch (error) {
         Logger.log(error);
-        console.log(error instanceof PrismaClientKnownRequestError && error.message.includes("Unique constraint failed on the fields: (`pseudo`)"))
         if(error instanceof PrismaClientKnownRequestError  && error.message.includes("Unique constraint failed on the fields: (`pseudo`)")) {
           throw new BadRequestException(errorConstant.pseudoUnavailable);
         }
