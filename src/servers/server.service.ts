@@ -84,7 +84,7 @@ export class ServerService {
       if(serverAdmins.length < 2 && serverAdmins[0].userId === server.userId) {
         throw new BadRequestException(errorConstant.lastAdminCannotLeave);
       }
-      await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}})
+      await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}});
       return false;
     }
     const joinedServer = await this.prisma.userServer.create({data: server});

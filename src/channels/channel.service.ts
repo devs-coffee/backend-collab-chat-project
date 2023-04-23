@@ -3,6 +3,7 @@ import { InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateChannelEntity } from './entities/create.channel.entity';
+import { UserChannelEntity } from './entities/userChannel.entity';
 
 @Injectable()
 export class ChannelService {
@@ -36,5 +37,14 @@ export class ChannelService {
     }
 
     return false;
+  }
+
+  async joinOrLeave(channel: UserChannelEntity) {
+    const hasAlreadyJoined = await this.prisma.userChannel.findFirst({where : {AND : [{channelId: channel.channelId}, {userId: channel.userId}]}});
+    if(hasAlreadyJoined !== null) {
+      await this.prisma.userChannel.delete({ where : {id: hasAlreadyJoined.id}});
+      return false;
+    }
+    const joinedChannel = await this.prisma.userChannel.create({data: channel});
   }
 }

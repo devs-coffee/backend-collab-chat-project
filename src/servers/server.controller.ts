@@ -99,8 +99,8 @@ export class ServerController {
   @UseGuards(JwtAuthGuard)
   @Post("join")
   @ApiCreatedResponse({ type: Boolean })
-  @ApiBadRequestResponse({ type : BadRequestException})
-  async joinOrLeave(@Body() joinRequest: JoinRequestDto, @Request() req) : Promise<OperationResult<boolean>> {
+  @ApiBadRequestResponse({ type : BadRequestException })
+  async joinOrLeave(@Body() joinRequest: JoinServerRequestDto, @Request() req) : Promise<OperationResult<boolean>> {
     const result = new OperationResult<boolean>();
     result.isSucceed = false;
     const dto = {
