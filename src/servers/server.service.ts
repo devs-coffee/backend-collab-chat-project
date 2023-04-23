@@ -15,7 +15,7 @@ export class ServerService {
 
   async create(server: ServerDto) {
     const serverEntity = this.mapper.map(server, ServerDto, ServerEntity);
-    const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général'}]}, users: { create : [{userId: server.userId, isAdmin: true}]}} });
+    const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général', users: {create: {userId: server.userId}}}]}, users: { create : [{userId: server.userId, isAdmin: true}]}} });
     // if(created) {
     //     const userServer = new UserServerDto();
     //     userServer.serverId = created.id;
