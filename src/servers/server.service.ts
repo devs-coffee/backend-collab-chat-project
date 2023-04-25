@@ -8,6 +8,8 @@ import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { errorConstant } from '../constants/errors.constants';
 import { UserServerEntity } from './entities/user-server-entity';
+import { FullServerEntity } from './entities/fullServer.entity';
+import { FullServerDto } from '../dtos/servers/fullServer.dto';
 
 @Injectable()
 export class ServerService {
@@ -37,9 +39,9 @@ export class ServerService {
   }
 
   async findOne(id: string, userId: string) {
-    const server = await this.prisma.server.findFirst({ where: { id }});
+    const server = await this.prisma.server.findFirst({ where: { id }, include: {channels: {select: {title: true, id: true}}}});
     const userServer = await this.prisma.userServer.findFirst({ where : { serverId: id ,  userId : userId}});
-    const serverEntity = this.mapper.map(server, ServerEntity, ServerEntity)
+    const serverEntity = this.mapper.map(server, FullServerEntity, FullServerDto);
     serverEntity.isCurrentUserAdmin  = userServer ? userServer.isAdmin : false;
     return serverEntity;
   }

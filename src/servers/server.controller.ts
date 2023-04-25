@@ -14,6 +14,8 @@ import { UserDto } from '../dtos/users/user.dto';
 import { UserEntity } from '../users/entities/user.entity';
 import { UserServerDto } from '../dtos/userServers/user-servers-dto';
 import { UserServerEntity } from './entities/user-server-entity';
+import { FullServerEntity } from './entities/fullServer.entity';
+import { FullServerDto } from '../dtos/servers/fullServer.dto';
 
 @Controller('servers')
 @ApiTags('servers')
@@ -127,12 +129,12 @@ export class ServerController {
   @ApiOkResponse({ type: ServerDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async findOne(@Param('id') id: string, @Request() req) {
-    const response = new OperationResult<ServerDto>();
+    const response = new OperationResult<FullServerDto>();
     response.isSucceed = false;
     try {
       const server = await this.serverService.findOne(id, req.user.id);
       response.isSucceed = true;
-      response.result = this.mapper.map(server, ServerEntity, ServerDto);
+      response.result = server;
       return response;
     } catch (error) {
       Logger.log(error);
