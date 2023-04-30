@@ -45,6 +45,7 @@ export class ChannelService {
       await this.prisma.userChannel.delete({ where : {id: hasAlreadyJoined.id}});
       return false;
     }
-    const joinedChannel = await this.prisma.userChannel.create({data: channel});
+    await this.prisma.userChannel.create({data: channel});
+    return true;
   }
 }

@@ -7,5 +7,4 @@ export class UserChannelEntity implements UserChannel {
     channelId: string;
     createdAt: Date;
     updatedAt: Date;
-    //user?: UserEntity;
 }

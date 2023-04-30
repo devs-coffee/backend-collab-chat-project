@@ -1,9 +1,9 @@
-import { Server } from '@prisma/client';
-import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import { ApiProperty } from '@nestjs/swagger';
 import { ChannelEntity } from 'src/channels/entities/channel.entity';
+import { ServerEntity } from './server.entity';
 
-export class FullServerEntity implements Server {
+export class FullServerEntity extends ServerEntity {
     @AutoMap()
     @ApiProperty()
     id: string;

@@ -1,11 +1,6 @@
-import { UserChannel } from '@prisma/client';
 import { UserEntity } from '../../users/entities/user.entity';
+import { UserChannelEntity } from './userChannel.entity';
 
-export class UserPrivateChannelEntity implements UserChannel {
-    id: string;
-    userId: string;
-    channelId: string;
-    createdAt: Date;
-    updatedAt: Date;
+export class UserPrivateChannelEntity extends UserChannelEntity {
     user?: UserEntity;
 }
