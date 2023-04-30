@@ -39,7 +39,7 @@ export class ServerService {
   }
 
   async findOne(id: string, userId: string) {
-    const server = await this.prisma.server.findFirst({ where: { id }, include: {channels: {select: {title: true, id: true}}}});
+    const server = await this.prisma.server.findFirst({ where: { id }, include: {channels: {select: {title: true, id: true, serverId: true}}}});
     const userServer = await this.prisma.userServer.findFirst({ where : { serverId: id ,  userId : userId}});
     const serverEntity = this.mapper.map(server, FullServerEntity, FullServerDto);
     serverEntity.isCurrentUserAdmin  = userServer ? userServer.isAdmin : false;
