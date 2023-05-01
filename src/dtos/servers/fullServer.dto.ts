@@ -1,22 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import { ChannelEntity } from 'src/channels/entities/channel.entity';
+import { ServerDto } from './server.dto';
 
-export class ServerDto {
+export class FullServerDto extends ServerDto {
     @AutoMap()
     @ApiProperty()
-    id?: string;
-
-    @AutoMap()
-    @ApiProperty()
-    name: string;
-
-    @AutoMap()
-    @ApiProperty()
-    picture?: string;
-
-    @AutoMap()
-    @ApiProperty()
-    categories: string[];
+    channels: ChannelEntity[]
 
     @AutoMap()
     isPrivate: boolean;

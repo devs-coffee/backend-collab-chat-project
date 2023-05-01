@@ -1,0 +1,3 @@
+interface JoinChannelRequestDto {
+    channelId: string;
+}

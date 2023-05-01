@@ -14,7 +14,8 @@ import { MessageDto } from '../dtos/messages/create-message.dto';
 import { ChannelEntity } from '../channels/entities/channel.entity';
 import { ChannelDto } from '../dtos/channels/channel.dto';
 import { UserChannelEntity } from '../channels/entities/userChannel.entity';
-import { UserChannelDto } from '../dtos/channels/channel.user.dto';
+import { UserPrivateChannelEntity } from '../channels/entities/userPrivateChannel.entity';
+import { UserChannelDto } from '../dtos/userChannels/user-channel-dto';
 import { MessageCreateEntity } from '../messages/entities/message.create.entity';
 import { ChannelServerDto } from '../dtos/channels/channel.server.dto';
 import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
@@ -23,6 +24,8 @@ import { UpdateChannelDto } from '../dtos/channels/update.channel.dto';
 import { CreateChannelEntity } from '../channels/entities/create.channel.entity';
 import { UserServerDto } from '../dtos/userServers/user-servers-dto';
 import { UserServerEntity } from '../servers/entities/user-server-entity';
+import { FullServerDto } from '../dtos/servers/fullServer.dto';
+import { FullServerEntity } from '../servers/entities/fullServer.entity';
 
 @Injectable()
 export class AutoMapping extends AutomapperProfile {
@@ -38,7 +41,7 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, UserEntity, LoginSignupResponse);
             createMap(mapper, CreateUserDto, UserDto);
             createMap(mapper, UpdateUserDto, UserEntity);
-            createMap(mapper, UserChannelEntity, UserEntity, forMember(u => u, mapFrom(ue => ue.user)))
+            createMap(mapper, UserChannelEntity, UserEntity)
             // will map the user without passwordConfirm, necessary to be able to create a user
             createMap(mapper, CreateUserDto, CreateUserDto);
 
@@ -46,6 +49,7 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, ServerDto, ServerEntity, forMember(server => server.categories, mapFrom(se => se.categories)));
             createMap(mapper, ServerEntity, ServerDto, forMember(server => server.categories, mapFrom(se => se.categories)));
             createMap(mapper, ServerEntity, ServerEntity, forMember(server => server.categories, mapFrom(se => se.categories)));
+            createMap(mapper, FullServerEntity, FullServerDto, forMember(server => server.categories, mapFrom(se => se.categories)), forMember(server => server.channels, mapFrom(se => se.channels)));
 
             createMap(mapper, ServerDto, UpdateServerDto, forMember(server => server.categories, mapFrom(se => se.categories)));
             createMap(mapper, UpdateServerDto, ServerDto, forMember(server => server.categories, mapFrom(se => se.categories)));
@@ -67,7 +71,7 @@ export class AutoMapping extends AutomapperProfile {
 
             createMap(mapper, UserChannelDto, UserChannelEntity);
 
-            createMap(mapper, UserChannelEntity, UserChannelDto, forMember(
+            createMap(mapper, UserPrivateChannelEntity, UserChannelDto, forMember(
                 (destination) => destination.user,
                 mapWith(UserDto, UserEntity, (source) => source.user))
             );

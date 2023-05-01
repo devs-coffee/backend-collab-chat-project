@@ -13,6 +13,9 @@ import { ServerEntity } from '../servers/entities/server.entity';
 import { ChannelService } from './channel.service';
 import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
+import { UserChannelDto } from '../dtos/userChannels/user-channel-dto';
+import { UserChannelEntity } from './entities/userChannel.entity';
+import { UserChannel } from '@prisma/client';
 
 @Controller('channels')
 @ApiTags('channels')
@@ -39,6 +42,31 @@ export class ChannelController {
     } catch (error) {
         Logger.log(error);
         throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("join")
+  @ApiCreatedResponse({ type: Boolean })
+  @ApiBadRequestResponse({ type: BadRequestException })
+  async joinOrLeave(@Body() joinRequest: JoinChannelRequestDto, @Request() req) : Promise<OperationResult<boolean>> {
+    const result = new OperationResult<boolean>();
+    result.isSucceed = false;
+    const dto = {
+      ...joinRequest,
+      userId: req.user.id
+    }
+    try {
+      const channelToJoinOrLeave = this.mapper.map(dto, UserChannelDto, UserChannelEntity);
+      const joined = await this.channelService.joinOrLeave(channelToJoinOrLeave);
+      result.isSucceed = true;
+      result.result = joined;
+      return result;
+    } catch(error) {
+      if(error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 

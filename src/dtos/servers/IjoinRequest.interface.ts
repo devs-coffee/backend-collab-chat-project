@@ -1,3 +1,0 @@
-interface JoinRequestDto {
-    serverId: string;
-}
