@@ -1,7 +1,7 @@
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty } from '@nestjs/swagger';
 import { Channel } from '@prisma/client';
-import { UserChannelEntity } from './userChannel.entity';
+import { UserPrivateChannelEntity } from './userPrivateChannel.entity';
 
 export class ChannelEntity implements Channel {
     @AutoMap()
@@ -23,5 +23,5 @@ export class ChannelEntity implements Channel {
     updatedAt: Date;
 
     @AutoMap()
-    users?: UserChannelEntity[]
+    users?: UserPrivateChannelEntity[]
 }

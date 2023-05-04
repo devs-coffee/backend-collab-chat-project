@@ -66,7 +66,7 @@ export class AutoMapping extends AutomapperProfile {
             // channels
             createMap(mapper, ChannelEntity, ChannelDto, forMember(
                 (destination) => destination.users,
-                mapWith(UserChannelDto, UserChannelEntity, (source) => source.users))
+                mapWith(UserChannelDto, UserPrivateChannelEntity, (source) => source.users))
             );
 
             createMap(mapper, UserChannelDto, UserChannelEntity);
