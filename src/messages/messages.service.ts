@@ -36,8 +36,13 @@ export class MessagesService {
     return this.prisma.message.create({data : {...message, channelId}});
   }
 
-  async getMyMessagesByChannelId(channelId: string){
-    const messages = await this.prisma.message.findMany({where : { channelId }, include : { user : true}});
+  async getMyMessagesByChannelId(channelId: string, offset?: string){
+    let criterias:any = {where : { channelId }, include : { user : true}, take: -4, orderBy: {createdAt: 'desc'}};
+    if(offset) {
+      criterias.cursor = {id: offset};
+      criterias.skip = 1;
+    }
+    const messages = await this.prisma.message.findMany(criterias);
     return messages;
   }
 
