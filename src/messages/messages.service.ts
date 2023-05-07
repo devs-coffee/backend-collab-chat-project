@@ -37,7 +37,7 @@ export class MessagesService {
   }
 
   async getMyMessagesByChannelId(channelId: string, offset?: string){
-    let criterias:any = {where : { channelId }, include : { user : true}, take: -4, orderBy: {createdAt: 'desc'}};
+    let criterias:any = {where : { channelId }, include : { user : {select: {id: true, pseudo: true}}}, take: -10, orderBy: {createdAt: 'desc'}};
     if(offset) {
       criterias.cursor = {id: offset};
       criterias.skip = 1;

@@ -20,7 +20,7 @@ export class MessagesController {
   @Get(":channelId")
   @ApiCreatedResponse({ type: MessageDto, isArray : true })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async getMessages(@Param("id") id : string, @Query("offset") offset? : string | undefined) : Promise<OperationResult<MessageDto[]>> {
+  async getMessages(@Param("channelId") id : string, @Query("offset") offset? : string | undefined) : Promise<OperationResult<MessageDto[]>> {
     const result = new OperationResult<MessageDto[]>();
     result.isSucceed = false;
     try {
