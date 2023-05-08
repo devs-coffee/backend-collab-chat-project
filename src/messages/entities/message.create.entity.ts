@@ -20,6 +20,7 @@ export class MessageCreateEntity implements Message {
     @AutoMap()
     channelId: string;
 
+    @AutoMap()
     @ApiProperty()
     createdAt: Date;
 
