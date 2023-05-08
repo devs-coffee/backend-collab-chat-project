@@ -26,6 +26,5 @@ export class MessageCreateEntity implements Message {
     @ApiProperty()
     updatedAt: Date;
 
-    @AutoMap()
-    user?: UserEntity;
+    
 }

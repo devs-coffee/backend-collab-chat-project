@@ -56,11 +56,11 @@ export class AutoMapping extends AutomapperProfile {
             createMap(mapper, UpdateServerDto, ServerEntity, forMember(server => server.categories, mapFrom(se => se.categories)));
             // messages
             createMap(mapper, MessageDto, MessageEntity);
-            createMap(mapper, MessageEntity, MessageDto);
-            createMap(mapper, MessageCreateEntity, MessageDto, forMember(
+            createMap(mapper, MessageEntity, MessageDto, forMember(
                 (destination) => destination.user,
                 mapWith(UserDto, UserEntity, (source) => source.user))
             );
+            createMap(mapper, MessageCreateEntity, MessageDto);
             createMap(mapper, UpdateMessageDto, MessageEntity);
 
             // channels

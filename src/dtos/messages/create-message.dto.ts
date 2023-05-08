@@ -23,4 +23,8 @@ export class MessageDto {
 
     @AutoMap()
     user?: UserDto;
+
+    @AutoMap()
+    @ApiProperty()
+    createdAt: Date;
 }

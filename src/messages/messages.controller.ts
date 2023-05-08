@@ -1,6 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { errorConstant } from '../constants/errors.constants';
@@ -20,13 +20,13 @@ export class MessagesController {
   @Get(":channelId")
   @ApiCreatedResponse({ type: MessageDto, isArray : true })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async getMessages(@Param("id") id : string) : Promise<OperationResult<MessageDto[]>> {
+  async getMessages(@Param("channelId") id : string, @Query("offset") offset? : string | undefined) : Promise<OperationResult<MessageDto[]>> {
     const result = new OperationResult<MessageDto[]>();
     result.isSucceed = false;
     try {
-      const messages = await this.messagesService.getMyMessagesByChannelId(id);
+      const messages = await this.messagesService.getMyMessagesByChannelId(id, offset);
       result.isSucceed = true;
-      result.result = this.mapper.mapArray(messages, MessageCreateEntity, MessageDto);
+      result.result = this.mapper.mapArray(messages, MessageEntity, MessageDto);
       return result;
     } catch (error) {
         Logger.log(error);

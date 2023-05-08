@@ -1,6 +1,7 @@
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty } from '@nestjs/swagger';
 import { Message } from '@prisma/client';
+import { UserEntity } from '../../users/entities/user.entity';
 
 export class MessageEntity implements Message {
     @AutoMap()
@@ -19,7 +20,11 @@ export class MessageEntity implements Message {
     @AutoMap()
     channelId: string;
 
+    @AutoMap()
+    user?: UserEntity;
+
     @ApiProperty()
+    @AutoMap()
     createdAt: Date;
 
     @ApiProperty()
