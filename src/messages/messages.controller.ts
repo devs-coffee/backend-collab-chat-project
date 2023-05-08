@@ -26,7 +26,7 @@ export class MessagesController {
     try {
       const messages = await this.messagesService.getMyMessagesByChannelId(id, offset);
       result.isSucceed = true;
-      result.result = this.mapper.mapArray(messages, MessageCreateEntity, MessageDto);
+      result.result = this.mapper.mapArray(messages, MessageEntity, MessageDto);
       return result;
     } catch (error) {
         Logger.log(error);
