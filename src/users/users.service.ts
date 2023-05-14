@@ -17,7 +17,10 @@ export class UsersService {
     return this.prisma.user.create({ data: user});
   }
 
-  findAll() {
+  findAll(userIds: string[]) {
+    if(userIds.length > 0) {
+      return this.prisma.user.findMany({ where: {id: {in: userIds}}});
+    }
     return this.prisma.user.findMany();
   }
 
