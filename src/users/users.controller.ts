@@ -25,16 +25,13 @@ export class UsersController {
   @Get()
   @ApiOkResponse({ type: UserDto, isArray: true })
   @ApiBadRequestResponse({type: BadRequestException })
-  async findAll(@Query("idList") idList) : Promise<OperationResult<UserDto[]>> {
+  async findAll(@Query("idList") idList?) : Promise<OperationResult<UserDto[]>> {
     const response = new OperationResult<UserDto[]>();
     response.isSucceed = false;
     try {
-      let idArray = [];
-      if(idList) {
-        idArray = idList.split(',');
-      }
       
-      const users = await this.usersService.findAll(idArray);
+      
+      const users = await this.usersService.findAll(idList);
       if(users && users.length > 0) {
         response.isSucceed = true;
         response.result = this.mapper.mapArray(users, UserEntity, UserDto);
