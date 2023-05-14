@@ -16,15 +16,22 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService, @InjectMapper() private readonly mapper: Mapper) {}
 
+  /**
+   * Get a list of users
+   * @param idList list of users id, coma separated
+   * @returns list of users ( userDto[] )
+   */
   @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOkResponse({ type: UserDto, isArray: true })
   @ApiBadRequestResponse({type: BadRequestException })
-  async findAll() : Promise<OperationResult<UserDto[]>> {
+  async findAll(@Query("idList") idList?) : Promise<OperationResult<UserDto[]>> {
     const response = new OperationResult<UserDto[]>();
     response.isSucceed = false;
     try {
-      const users = await this.usersService.findAll();
+      
+      
+      const users = await this.usersService.findAll(idList);
       if(users && users.length > 0) {
         response.isSucceed = true;
         response.result = this.mapper.mapArray(users, UserEntity, UserDto);

@@ -17,7 +17,14 @@ export class UsersService {
     return this.prisma.user.create({ data: user});
   }
 
-  findAll() {
+  findAll(idList?: string) {
+    let idArray = [];
+      if(idList) {
+        idArray = idList.split(',');
+      }
+    if(idArray.length > 0) {
+      return this.prisma.user.findMany({ where: {id: {in: idArray}}});
+    }
     return this.prisma.user.findMany();
   }
 
