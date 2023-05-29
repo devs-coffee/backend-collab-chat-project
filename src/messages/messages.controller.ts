@@ -45,7 +45,7 @@ export class MessagesController {
       const createdMessage = await this.messagesService.create({...message, userId: req.user.id});
       if(createdMessage) {
         result.isSucceed = true;
-        result.result = this.mapper.map(createdMessage, MessageCreateEntity, MessageDto);
+        result.result = this.mapper.map(createdMessage, MessageEntity, MessageDto);
       } else {
         throw new BadRequestException(errorConstant.serverNotCreated);
       }
