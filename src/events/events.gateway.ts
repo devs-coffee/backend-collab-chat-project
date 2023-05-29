@@ -8,8 +8,9 @@ import {
   } from '@nestjs/websockets';
   import { Logger } from '@nestjs/common';
   import { Socket, Server } from 'socket.io';
-  
-@WebSocketGateway({
+import { MessageDto } from '../dtos/messages/create-message.dto';
+
+  @WebSocketGateway({
   cors: {
     origin: '*',
   },
@@ -22,9 +23,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('EventsGateway');
   
-  @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, payload: string): void {
-    this.server.emit('msgToClient', payload);
+  @SubscribeMessage('broadcastMessage')
+  handleMessage(channelId: string, message: MessageDto): void {
+    this.server.emit(`message_${channelId}`, message);
   }
 
   @SubscribeMessage('private_room')

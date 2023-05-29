@@ -6,10 +6,11 @@ import { ChannelEntity } from '../channels/entities/channel.entity';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { MessageCreateEntity } from './entities/message.create.entity';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class MessagesService {
-  constructor(private prisma: PrismaService, @InjectMapper() private readonly mapper: Mapper, private readonly channelService : ChannelService)  {}
+  constructor(private prisma: PrismaService, @InjectMapper() private readonly mapper: Mapper, private readonly channelService : ChannelService, private readonly eventsGateway: EventsGateway)  {}
 
   async create(messageDto: MessageDto) {
     const message = this.mapper.map(messageDto, MessageDto, MessageCreateEntity);
@@ -33,7 +34,9 @@ export class MessagesService {
         ]
       })
     } 
-    return this.prisma.message.create({data : {...message, channelId}});
+    const created = await this.prisma.message.create({data : {...message, channelId}});
+    this.eventsGateway.handleMessage(channelId, created);
+    return await this.prisma.message.findFirst({where: {id: created.id}, include: { user: true }});
   }
 
   async getMyMessagesByChannelId(channelId: string, offset?: string){
