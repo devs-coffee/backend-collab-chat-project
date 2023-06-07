@@ -7,7 +7,6 @@ import { errorConstant } from '../constants/errors.constants';
 import { OperationResult } from '../core/OperationResult';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
-import { MessageCreateEntity } from './entities/message.create.entity';
 import { MessageEntity } from './entities/message.entity';
 import { MessagesService } from './messages.service';
 
@@ -16,6 +15,12 @@ import { MessagesService } from './messages.service';
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService, @InjectMapper() private readonly mapper: Mapper) {}
 
+  /**
+   * Get the messages from a channel
+   * @param id id of channel
+   * @param offset id of message to start from
+   * @returns a list of messages
+   */
   @UseGuards(JwtAuthGuard)
   @Get(":channelId")
   @ApiCreatedResponse({ type: MessageDto, isArray : true })
@@ -34,6 +39,11 @@ export class MessagesController {
     }
   }
 
+  /**
+   * Create a message
+   * @param message message to create
+   * @returns the created message
+   */
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiCreatedResponse({ type: MessageDto })
@@ -56,6 +66,12 @@ export class MessagesController {
     }
   }
 
+  /**
+   * Update a message
+   * @param messageId id of message to update 
+   * @param updateMessageDto data to update
+   * @returns the new message's data
+   */
   @UseGuards(JwtAuthGuard)
   @Put(":messageId")
   @ApiCreatedResponse({ type: UpdateMessageDto })
@@ -73,7 +89,6 @@ export class MessagesController {
       } else {
         result.result = null;
       }
-
       return result;
     } catch (error) {
         Logger.log(error);
@@ -81,6 +96,11 @@ export class MessagesController {
     }
   }
 
+  /**
+   * Delete a message by id
+   * @param id id of message to delete
+   * @returns true if message is deleted, false otherWhise
+   */
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOkResponse({ type: Boolean })

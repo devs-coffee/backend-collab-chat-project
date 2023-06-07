@@ -25,12 +25,10 @@ export class UsersController {
   @Get()
   @ApiOkResponse({ type: UserDto, isArray: true })
   @ApiBadRequestResponse({type: BadRequestException })
-  async findAll(@Query("idList") idList?) : Promise<OperationResult<UserDto[]>> {
+  async findAll(@Query("idList") idList?:string) : Promise<OperationResult<UserDto[]>> {
     const response = new OperationResult<UserDto[]>();
     response.isSucceed = false;
     try {
-      
-      
       const users = await this.usersService.findAll(idList);
       if(users && users.length > 0) {
         response.isSucceed = true;
@@ -38,7 +36,6 @@ export class UsersController {
       } else {
         response.result = [];
       }
-
       return response;
     } catch (error) {
       Logger.log(error);
@@ -46,11 +43,16 @@ export class UsersController {
     }
   }
 
+  /**
+   * Search for users by name
+   * @param name pseudo of searched user
+   * @returns a list of corresponding users
+   */
   @UseGuards(JwtAuthGuard)
   @Get("searchUser")
   @ApiOkResponse({ type: UserDto, isArray: true })
   @ApiBadRequestResponse({type: BadRequestException })
-  async search(@Query("name") name) : Promise<OperationResult<UserDto[]>> {
+  async search(@Query("name") name:string) : Promise<OperationResult<UserDto[]>> {
     const response = new OperationResult<UserDto[]>();
     response.isSucceed = false;
     try {
@@ -64,6 +66,11 @@ export class UsersController {
     }
   }
 
+  /**
+   * Get a user by id
+   * @param id id of user
+   * @returns the corresponding user DTO
+   */
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOkResponse({ type: UserDto })
@@ -79,7 +86,6 @@ export class UsersController {
       } else {
         response.result = null;
       }
-
       return response;
     } catch (error) {
       Logger.log(error);
@@ -87,6 +93,12 @@ export class UsersController {
     }
   }
 
+  /**
+   * put a user by id
+   * @param id id of user to update
+   * @param updateUserDto new user's data
+   * @returns the new user's data
+   */
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   @ApiOkResponse({ type: UserDto })
@@ -102,7 +114,6 @@ export class UsersController {
       } else {
         result.result = null;
       }
-
       return result;
     } catch (error) {
         Logger.log(error);
@@ -113,6 +124,11 @@ export class UsersController {
     }
   }
 
+  /**
+   * Delete a user
+   * @param id id of user to delete
+   * @returns true if successfully deleted
+   */
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOkResponse({ type: Boolean })
@@ -125,7 +141,6 @@ export class UsersController {
       response.isSucceed = true;
       response.result = true;
       return response;
-
     } catch (error) {
       Logger.log(error);
       throw new BadRequestException(errorConstant.errorOccured);
