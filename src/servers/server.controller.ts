@@ -1,27 +1,30 @@
-import { Controller, Get, Body, Param, Delete, Request, BadRequestException, Logger, UseGuards, Post, Put, Query } from '@nestjs/common';
-import { ApiTags, ApiOkResponse, ApiBadRequestResponse, ApiCreatedResponse } from '@nestjs/swagger';
-import { OperationResult } from '../core/OperationResult';
-import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { ServerEntity } from './entities/server.entity';
-import { errorConstant } from '../constants/errors.constants';
-import { ServerService } from './server.service';
-import { ServerDto } from '../dtos/servers/server.dto';
+import { InjectMapper } from '@automapper/nestjs';
+import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
+import { errorConstant } from '../constants/errors.constants';
+import { OperationResult } from '../core/OperationResult';
+import { FullServerDto } from '../dtos/servers/fullServer.dto';
+import { ServerDto } from '../dtos/servers/server.dto';
 import { UpdateServerDto } from '../dtos/servers/update-server.dto';
-import { UsersService } from '../users/users.service';
+import { UserServerDto } from '../dtos/userServers/user-servers-dto';
 import { UserDto } from '../dtos/users/user.dto';
 import { UserEntity } from '../users/entities/user.entity';
-import { UserServerDto } from '../dtos/userServers/user-servers-dto';
+import { UsersService } from '../users/users.service';
+import { ServerEntity } from './entities/server.entity';
 import { UserServerEntity } from './entities/user-server-entity';
-import { FullServerEntity } from './entities/fullServer.entity';
-import { FullServerDto } from '../dtos/servers/fullServer.dto';
+import { ServerService } from './server.service';
 
 @Controller('servers')
 @ApiTags('servers')
 export class ServerController {
   constructor(private readonly serverService: ServerService, @InjectMapper() private readonly mapper: Mapper, private readonly userService: UsersService) {}
 
+  /**
+   * Get a list of servers
+   * @returns Server[]
+   */
   @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOkResponse({ type: ServerDto, isArray: true })
@@ -40,6 +43,11 @@ export class ServerController {
     }
   }
 
+  /**
+   * Get all the users of a given server
+   * @param serverId id of server
+   * @returns a list of users
+   */
   @UseGuards(JwtAuthGuard)
   @Get(":serverId/users")
   @ApiOkResponse({ type: UserDto, isArray: true })
@@ -58,6 +66,11 @@ export class ServerController {
     }
   }
 
+  /**
+   * Search a server by name or keyword
+   * @param keyword 
+   * @returns a list of servers
+   */
   @UseGuards(JwtAuthGuard)
   @Get("search")
   @ApiOkResponse({ type: ServerDto, isArray: true })
@@ -76,6 +89,11 @@ export class ServerController {
     }
   }
 
+  /**
+   * Create a server
+   * @param server data to create the server
+   * @returns the new server's data
+   */
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiCreatedResponse({ type: ServerDto })
@@ -98,6 +116,11 @@ export class ServerController {
     }
   }
 
+  /**
+   * Request to join or leave a server
+   * @param joinRequest id of server to join or leave
+   * @returns true if server is joined, false if left
+   */
   @UseGuards(JwtAuthGuard)
   @Post("join")
   @ApiCreatedResponse({ type: Boolean })
@@ -124,6 +147,11 @@ export class ServerController {
     }
   }
 
+  /**
+   * Get a server by id
+   * @param id id of server
+   * @returns the server
+   */
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOkResponse({ type: ServerDto })
@@ -142,6 +170,12 @@ export class ServerController {
     }
   }
 
+  /**
+   * Update a server
+   * @param id id of server
+   * @param updateServerDto data tu update server
+   * @returns the new server's data
+   */
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   @ApiOkResponse({ type: UpdateServerDto })
@@ -158,7 +192,6 @@ export class ServerController {
       } else {
         result.result = null;
       }
-
       return result;
     } catch (error) {
         Logger.log(error);
@@ -166,6 +199,11 @@ export class ServerController {
     }
   }
 
+  /**
+   * Delete a server by id
+   * @param id id of server
+   * @returns true if server is deleted, false otherwhise
+   */
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOkResponse({ type: Boolean })
