@@ -8,5 +8,6 @@ export const errorConstant = {
     itemNotExisting: "L'item n'existe pas.",
     cannotGetUserChannels : "Nous n'avons pas pu récupérer les channels, veuillez réessayer plus tard.",
     lastAdminCannotLeave : "Vous êtes le dernier admin. Vous devez nommer un autre admin ou supprimer le serveur",
-    pseudoUnavailable: "Ce pseudo est déjà utilisé"
+    pseudoUnavailable: "Ce pseudo est déjà utilisé",
+    userNotServerMember: "Vous n'êtes pas membre de ce serveur"
   };
