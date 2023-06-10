@@ -35,7 +35,6 @@ export class MessagesService {
       })
     }
     const serverId = await this.prisma.channel.findUnique({where: {id: channelId}, select: {serverId: true}});
-    console.log(serverId);
     await this.prisma.userServer.findFirstOrThrow({where : {AND: [serverId, {userId: message.userId}]}});
     const created = await this.prisma.message.create({data : {...message, channelId}});
     this.eventsGateway.handleMessage(channelId, created);
