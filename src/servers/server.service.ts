@@ -75,6 +75,9 @@ export class ServerService {
   }
 
   async search(keyword: string){
+    if(keyword === '' || keyword === null){
+      throw new BadRequestException(errorConstant.provideAKeywordToSearchAServer);
+    }
     const servers = await this.prisma.server.findMany({ where : {OR : [{ name : {contains: keyword, mode: 'insensitive'}}, {categories: {hasSome: keyword.toLowerCase()}}]}, orderBy : { name : 'asc'}});
     return servers;
   }

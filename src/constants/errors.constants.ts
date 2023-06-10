@@ -4,10 +4,11 @@ export const errorConstant = {
     requiredPasswordEmailFields: "Les champs email et mot de passe sont requis.",
     userDoesNotExist: "L'utilisateur n'existe pas.",
     serverNotCreated: "Nous n'avons pas pu créer le serveur, veuillez réessayer plus tard.",
-    noUserRights: "Vous n'avez pas les droits pouur mettre à jour le serveur.",
+    noUserRights: "Vous n'avez pas les droits pour mettre à jour le serveur.",
     itemNotExisting: "L'item n'existe pas.",
     cannotGetUserChannels : "Nous n'avons pas pu récupérer les channels, veuillez réessayer plus tard.",
     lastAdminCannotLeave : "Vous êtes le dernier admin. Vous devez nommer un autre admin ou supprimer le serveur",
     pseudoUnavailable: "Ce pseudo est déjà utilisé",
-    userNotServerMember: "Vous n'êtes pas membre de ce serveur"
+    userNotServerMember: "Vous n'êtes pas membre de ce serveur",
+    provideAKeywordToSearchAServer: "Ce champs ne peut pas être vide."
   };

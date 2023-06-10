@@ -85,6 +85,9 @@ export class ServerController {
       return response;
     } catch (error) {
       Logger.log(error);
+      if(error instanceof BadRequestException){
+        throw error;
+      }
       throw new BadRequestException(errorConstant.errorOccured);
     }
   }
