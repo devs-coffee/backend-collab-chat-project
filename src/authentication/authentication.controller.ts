@@ -52,14 +52,14 @@ export class AuthenticationController {
       }
       return result;
     } catch (error) {
-      Logger.log(error);
-      if(error.message === errorConstant.passwordNotMatching){
-        throw new BadRequestException(error.message);
-      }
-      if(error instanceof PrismaClientKnownRequestError  && error.message.includes("Unique constraint failed on the fields: (`pseudo`)")) {
-        throw new BadRequestException(errorConstant.pseudoUnavailable);
-      }
-      throw new BadRequestException(errorConstant.errorOccured);
+        Logger.log(error);
+        if(error.message === errorConstant.passwordNotMatching){
+          throw new BadRequestException(error.message);
+        }
+        if(error instanceof PrismaClientKnownRequestError  && error.message.includes("Unique constraint failed on the fields: (`pseudo`)")) {
+          throw new BadRequestException(errorConstant.pseudoUnavailable);
+        }
+        throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 
