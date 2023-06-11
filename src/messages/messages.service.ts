@@ -52,7 +52,9 @@ export class MessagesService {
   }
 
   async update(messageId: string, messageEntity: MessageCreateEntity) {
-    return await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
+    const updated = await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
+    this.eventsGateway.handleUpdateMessage(messageId, updated);
+    return updated;
   }
 
   async remove(messageId: string, userId: string) {
