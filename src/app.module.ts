@@ -8,12 +8,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { AutoMapping } from './core/automapping';
 import { ServersModule } from './servers/servers.module';
-import { EventsModule } from './events/events.module';
 import { MessagesModule } from './messages/messages.module';
 import { ChannelModule } from './channels/channel.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, MessagesModule, ChannelModule, AuthenticationModule, ServersModule, EventsModule, AutomapperModule.forRoot({
+  imports: [PrismaModule, UsersModule, MessagesModule, ChannelModule, AuthenticationModule, ServersModule, AutomapperModule.forRoot({
     strategyInitializer: classes(),
 }),],
   controllers: [AppController],
