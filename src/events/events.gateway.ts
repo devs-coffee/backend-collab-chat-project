@@ -30,7 +30,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('broadcastMessage')
   handleUpdateMessage(messageId: string, message: MessageDto): void {
-    console.log(message)
     this.server.emit(`message_${messageId}`, message);
   }
 
