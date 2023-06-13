@@ -27,4 +27,7 @@ export class ServerEntity implements Server {
 
     @AutoMap()
     isCurrentUserAdmin?: boolean = false;
+
+    @AutoMap()
+    isCurrentUserMember?: boolean = false;
 }

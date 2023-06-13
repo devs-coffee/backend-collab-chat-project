@@ -18,6 +18,8 @@ export class ServerService {
   async create(server: ServerDto) {
     const serverEntity = this.mapper.map(server, ServerDto, ServerEntity);
     const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général', users: {create: {userId: server.userId}}}]}, users: { create : [{userId: server.userId, isAdmin: true}]}} });
+    const response = this.mapper.map(created, ServerEntity, ServerDto)
+    response.isCurrentUserMember = true;
     return created;
   }
 
@@ -30,6 +32,7 @@ export class ServerService {
           allUserServers.forEach(userServer => {
             if(server.id === userServer.serverId){
               server.isCurrentUserAdmin = userServer.isAdmin;
+              server.isCurrentUserMember = true;
             }
           });
         });
@@ -42,6 +45,7 @@ export class ServerService {
     const server = await this.prisma.server.findFirst({ where: { id }, include: {channels: {select: {title: true, id: true, serverId: true}}}});
     const userServer = await this.prisma.userServer.findFirst({ where : { serverId: id ,  userId : userId}});
     const serverEntity = this.mapper.map(server, FullServerEntity, FullServerDto);
+    serverEntity.isCurrentUserMember = userServer ? true : false;
     serverEntity.isCurrentUserAdmin  = userServer ? userServer.isAdmin : false;
     return serverEntity;
   }
@@ -50,6 +54,7 @@ export class ServerService {
     const userServer = await this.prisma.userServer.findFirst({ where: { serverId: id, userId : updateServerDto.userId }});
     if(userServer.isAdmin){
       const serverToUpdate = this.mapper.map(updateServerDto, UpdateServerDto, ServerEntity);  
+      //! ajouter isCurrentServerAdmin et isCurrentServerMemebr
       return this.prisma.server.update({
             where: { id },
             data: serverToUpdate,
@@ -79,6 +84,7 @@ export class ServerService {
       throw new BadRequestException(errorConstant.provideAKeywordToSearchAServer);
     }
     const servers = await this.prisma.server.findMany({ where : {OR : [{ name : {contains: keyword, mode: 'insensitive'}}, {categories: {hasSome: keyword.toLowerCase()}}]}, orderBy : { name : 'asc'}});
+    //! ajouter isCurrentUserAdmin et isCurrentUserMember.
     return servers;
   }
 
@@ -90,10 +96,12 @@ export class ServerService {
         throw new BadRequestException(errorConstant.lastAdminCannotLeave);
       }
       await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}});
+      //! côté client, mettre à jour le serveur
       return false;
     }
     const joinedServer = await this.prisma.userServer.create({data: server});
     if(joinedServer){
+      //! côté client, mettre à jour le serveur
       return true;
     }
     return false;

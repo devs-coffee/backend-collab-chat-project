@@ -32,4 +32,7 @@ export class FullServerEntity extends ServerEntity {
 
     @AutoMap()
     isCurrentUserAdmin?: boolean = false;
+
+    @AutoMap()
+    isCurrentUserMember?: boolean = false;
 }

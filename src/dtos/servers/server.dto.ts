@@ -25,4 +25,7 @@ export class ServerDto {
 
     @AutoMap()
     isCurrentUserAdmin: boolean = false;
+
+    @AutoMap()
+    isCurrentUserMember: boolean = false;
 }
