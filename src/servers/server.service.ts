@@ -55,10 +55,19 @@ export class ServerService {
     if(userServer.isAdmin){
       const serverToUpdate = this.mapper.map(updateServerDto, UpdateServerDto, ServerEntity);  
       //! ajouter isCurrentServerAdmin et isCurrentServerMemebr
-      return this.prisma.server.update({
-            where: { id },
-            data: serverToUpdate,
-        });
+      const updated = await this.prisma.server.update({
+        where: { id },
+        data: serverToUpdate,
+      });
+      const response = this.mapper.map(updated, ServerEntity, ServerDto);
+      response.isCurrentUserAdmin = true;
+      response.isCurrentUserMember = true;
+      return response;
+      
+      // return this.prisma.server.update({
+      //   where: { id },
+      //   data: serverToUpdate,
+      // });
     }
     return new Error(errorConstant.noUserRights);
   }
@@ -84,7 +93,6 @@ export class ServerService {
       throw new BadRequestException(errorConstant.provideAKeywordToSearchAServer);
     }
     const servers = await this.prisma.server.findMany({ where : {OR : [{ name : {contains: keyword, mode: 'insensitive'}}, {categories: {hasSome: keyword.toLowerCase()}}]}, orderBy : { name : 'asc'}});
-    //! ajouter isCurrentUserAdmin et isCurrentUserMember.
     return servers;
   }
 

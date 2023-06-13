@@ -191,7 +191,8 @@ export class ServerController {
       const updatedServer = await this.serverService.update(id, updateServerDto);
       if(updatedServer) {
         result.isSucceed = true;
-        result.result = this.mapper.map(updatedServer, ServerEntity, ServerDto);
+        result.result = updatedServer;
+        //result.result = this.mapper.map(updatedServer, ServerEntity, ServerDto);
       } else {
         result.result = null;
       }
