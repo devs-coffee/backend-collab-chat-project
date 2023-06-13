@@ -26,8 +26,8 @@ export class ServerEntity implements Server {
     updatedAt: Date;
 
     @AutoMap()
-    isCurrentUserAdmin?: boolean = false;
+    isCurrentUserAdmin?: boolean;
 
     @AutoMap()
-    isCurrentUserMember?: boolean = false;
+    isCurrentUserMember?: boolean;
 }

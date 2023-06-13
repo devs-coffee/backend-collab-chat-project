@@ -24,8 +24,8 @@ export class ServerDto {
     userId: string;
 
     @AutoMap()
-    isCurrentUserAdmin: boolean = false;
+    isCurrentUserAdmin?: boolean = false;
 
     @AutoMap()
-    isCurrentUserMember: boolean = false;
+    isCurrentUserMember?: boolean = false;
 }
