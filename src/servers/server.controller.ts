@@ -35,7 +35,7 @@ export class ServerController {
     try {
       const servers = await this.serverService.findAll(req.user.id);
       response.isSucceed = true;
-      response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
+      response.result = servers;
       return response;
     } catch (error) {
       Logger.log(error);

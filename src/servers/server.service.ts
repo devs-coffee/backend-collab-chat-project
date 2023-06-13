@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { UpdateServerDto } from '../dtos/servers/update-server.dto';
 import { ServerDto } from '../dtos/servers/server.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -26,14 +26,14 @@ export class ServerService {
 
   async findAll(userId:string) {
     if(userId){
-        const servers = await this.prisma.server.findMany({where: { users : { some :{ userId: userId} } }});
-        const serverEntities = this.mapper.mapArray(servers, ServerEntity, ServerEntity);
-        serverEntities.forEach(async server => {
+        const servers = await this.prisma.server.findMany({where: { users : { some :{ userId } } }});
+        const serverDTOs = this.mapper.mapArray(servers, ServerEntity, ServerDto);
+        for(let server of serverDTOs) {
           server.isCurrentUserMember = true;
           const userServer = await this.prisma.userServer.findFirst({where: {AND: [{userId}, {serverId: server.id}]}});
           server.isCurrentUserAdmin = userServer.isAdmin;
-        });
-        return serverEntities;
+        }
+        return serverDTOs;
     }
     return null;
   }
