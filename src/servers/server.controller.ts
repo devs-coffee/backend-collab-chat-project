@@ -108,7 +108,8 @@ export class ServerController {
       const createdServer = await this.serverService.create({...server, userId: req.user.id});
       if(createdServer) {
         result.isSucceed = true;
-        result.result = this.mapper.map(createdServer, ServerEntity, ServerDto);
+        result.result = createdServer;
+        //result.result = this.mapper.map(createdServer, ServerEntity, ServerDto);
       } else {
         throw new BadRequestException(errorConstant.serverNotCreated);
       }

@@ -18,23 +18,20 @@ export class ServerService {
   async create(server: ServerDto) {
     const serverEntity = this.mapper.map(server, ServerDto, ServerEntity);
     const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général', users: {create: {userId: server.userId}}}]}, users: { create : [{userId: server.userId, isAdmin: true}]}} });
-    const response = this.mapper.map(created, ServerEntity, ServerDto)
+    const response = this.mapper.map(created, ServerEntity, ServerDto);
+    response.isCurrentUserAdmin = true;
     response.isCurrentUserMember = true;
-    return created;
+    return response;
   }
 
   async findAll(userId:string) {
     if(userId){
         const servers = await this.prisma.server.findMany({where: { users : { some :{ userId: userId} } }});
-        const allUserServers = await this.prisma.userServer.findMany({ where : { userId : userId}});
         const serverEntities = this.mapper.mapArray(servers, ServerEntity, ServerEntity);
-        serverEntities.forEach(server => {
-          allUserServers.forEach(userServer => {
-            if(server.id === userServer.serverId){
-              server.isCurrentUserAdmin = userServer.isAdmin;
-              server.isCurrentUserMember = true;
-            }
-          });
+        serverEntities.forEach(async server => {
+          server.isCurrentUserMember = true;
+          const userServer = await this.prisma.userServer.findFirst({where: {AND: [{userId}, {serverId: server.id}]}});
+          server.isCurrentUserAdmin = userServer.isAdmin;
         });
         return serverEntities;
     }
