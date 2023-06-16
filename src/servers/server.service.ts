@@ -16,34 +16,31 @@ export class ServerService {
 
   async create(server: ServerDto) {
     const serverEntity = this.mapper.map(server, ServerDto, ServerEntity);
-    const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général', users: {create: {userId: server.userId}}}]}, users: { create : [{userId: server.userId, isAdmin: true}]}}, include: { channels: {select: {id: true, title: true, serverId: true}} } });
-    const response = this.mapper.map(created, FullServerEntity, FullServerDto);
-    response.isCurrentUserAdmin = true;
-    response.isCurrentUserMember = true;
-    return response;
+    const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général', users: {create: {userId: server.userId}}}]}, users: { create : [{userId: server.userId, isAdmin: true}]}}, include: { channels: {select: {id: true, title: true, serverId: true}} } }) as FullServerEntity;
+    created.isCurrentUserAdmin = true;
+    created.isCurrentUserMember = true;
+    return created;
   }
 
   async findAll(userId:string) {
     if(userId){
-        const servers = await this.prisma.server.findMany({where: { users : { some :{ userId } } }});
-        const serverDTOs = this.mapper.mapArray(servers, ServerEntity, ServerDto);
-        for(let server of serverDTOs) {
+        const servers = await this.prisma.server.findMany({where: { users : { some :{ userId } } }}) as ServerEntity[];
+        for(let server of servers) {
           server.isCurrentUserMember = true;
           const userServer = await this.prisma.userServer.findFirst({where: {AND: [{userId}, {serverId: server.id}]}});
           server.isCurrentUserAdmin = userServer.isAdmin;
         }
-        return serverDTOs;
+        return servers;
     }
     return null;
   }
 
   async findOne(id: string, userId: string) {
-    const server = await this.prisma.server.findFirst({ where: { id }, include: {channels: {select: {title: true, id: true, serverId: true}}}});
+    const server = await this.prisma.server.findFirst({ where: { id }, include: {channels: {select: {title: true, id: true, serverId: true}}}}) as FullServerEntity;
     const userServer = await this.prisma.userServer.findFirst({ where : { serverId: id ,  userId : userId}});
-    const serverEntity = this.mapper.map(server, FullServerEntity, FullServerDto);
-    serverEntity.isCurrentUserMember = userServer ? true : false;
-    serverEntity.isCurrentUserAdmin  = userServer ? userServer.isAdmin : false;
-    return serverEntity;
+    server.isCurrentUserMember = userServer ? true : false;
+    server.isCurrentUserAdmin  = userServer ? userServer.isAdmin : false;
+    return server;
   }
 
   async update(id: string, updateServerDto: UpdateServerDto) {
@@ -54,11 +51,10 @@ export class ServerService {
         where: { id },
         data: serverToUpdate,
         include: {channels: {select: {title: true, id: true, serverId: true}}}
-      });
-      const response = this.mapper.map(updated, FullServerEntity, FullServerDto);
-      response.isCurrentUserAdmin = true;
-      response.isCurrentUserMember = true;
-      return response;
+      }) as FullServerEntity;
+      updated.isCurrentUserAdmin = true;
+      updated.isCurrentUserMember = true;
+      return updated;
     }
     return new Error(errorConstant.noUserRights);
   }
