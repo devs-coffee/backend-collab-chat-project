@@ -91,12 +91,10 @@ export class ServerService {
         throw new BadRequestException(errorConstant.lastAdminCannotLeave);
       }
       await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}});
-      //! côté client, mettre à jour le serveur
       return false;
     }
     const joinedServer = await this.prisma.userServer.create({data: server});
     if(joinedServer){
-      //! côté client, mettre à jour le serveur
       return true;
     }
     return false;
