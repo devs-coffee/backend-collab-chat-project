@@ -1,15 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { UpdateServerDto } from '../dtos/servers/update-server.dto';
-import { ServerDto } from '../dtos/servers/server.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { UserServerDto } from '../dtos/userServers/user-servers-dto';
-import { ServerEntity } from './entities/server.entity';
-import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { errorConstant } from '../constants/errors.constants';
-import { UserServerEntity } from './entities/user-server-entity';
-import { FullServerEntity } from './entities/fullServer.entity';
 import { FullServerDto } from '../dtos/servers/fullServer.dto';
+import { ServerDto } from '../dtos/servers/server.dto';
+import { UpdateServerDto } from '../dtos/servers/update-server.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { FullServerEntity } from './entities/fullServer.entity';
+import { ServerEntity } from './entities/server.entity';
+import { UserServerEntity } from './entities/user-server-entity';
 
 @Injectable()
 export class ServerService {
@@ -17,23 +16,23 @@ export class ServerService {
 
   async create(server: ServerDto) {
     const serverEntity = this.mapper.map(server, ServerDto, ServerEntity);
-    const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général', users: {create: {userId: server.userId}}}]}, users: { create : [{userId: server.userId, isAdmin: true}]}} });
-    return created;
+    const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général', users: {create: {userId: server.userId}}}]}, users: { create : [{userId: server.userId, isAdmin: true}]}}, include: { channels: {select: {id: true, title: true, serverId: true}} } });
+    const response = this.mapper.map(created, FullServerEntity, FullServerDto);
+    response.isCurrentUserAdmin = true;
+    response.isCurrentUserMember = true;
+    return response;
   }
 
   async findAll(userId:string) {
     if(userId){
-        const servers = await this.prisma.server.findMany({where: { users : { some :{ userId: userId} } }});
-        const allUserServers = await this.prisma.userServer.findMany({ where : { userId : userId}});
-        const serverEntities = this.mapper.mapArray(servers, ServerEntity, ServerEntity);
-        serverEntities.forEach(server => {
-          allUserServers.forEach(userServer => {
-            if(server.id === userServer.serverId){
-              server.isCurrentUserAdmin = userServer.isAdmin;
-            }
-          });
-        });
-        return serverEntities;
+        const servers = await this.prisma.server.findMany({where: { users : { some :{ userId } } }});
+        const serverDTOs = this.mapper.mapArray(servers, ServerEntity, ServerDto);
+        for(let server of serverDTOs) {
+          server.isCurrentUserMember = true;
+          const userServer = await this.prisma.userServer.findFirst({where: {AND: [{userId}, {serverId: server.id}]}});
+          server.isCurrentUserAdmin = userServer.isAdmin;
+        }
+        return serverDTOs;
     }
     return null;
   }
@@ -42,6 +41,7 @@ export class ServerService {
     const server = await this.prisma.server.findFirst({ where: { id }, include: {channels: {select: {title: true, id: true, serverId: true}}}});
     const userServer = await this.prisma.userServer.findFirst({ where : { serverId: id ,  userId : userId}});
     const serverEntity = this.mapper.map(server, FullServerEntity, FullServerDto);
+    serverEntity.isCurrentUserMember = userServer ? true : false;
     serverEntity.isCurrentUserAdmin  = userServer ? userServer.isAdmin : false;
     return serverEntity;
   }
@@ -50,10 +50,15 @@ export class ServerService {
     const userServer = await this.prisma.userServer.findFirst({ where: { serverId: id, userId : updateServerDto.userId }});
     if(userServer.isAdmin){
       const serverToUpdate = this.mapper.map(updateServerDto, UpdateServerDto, ServerEntity);  
-      return this.prisma.server.update({
-            where: { id },
-            data: serverToUpdate,
-        });
+      const updated = await this.prisma.server.update({
+        where: { id },
+        data: serverToUpdate,
+        include: {channels: {select: {title: true, id: true, serverId: true}}}
+      });
+      const response = this.mapper.map(updated, FullServerEntity, FullServerDto);
+      response.isCurrentUserAdmin = true;
+      response.isCurrentUserMember = true;
+      return response;
     }
     return new Error(errorConstant.noUserRights);
   }
@@ -90,10 +95,12 @@ export class ServerService {
         throw new BadRequestException(errorConstant.lastAdminCannotLeave);
       }
       await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}});
+      //! côté client, mettre à jour le serveur
       return false;
     }
     const joinedServer = await this.prisma.userServer.create({data: server});
     if(joinedServer){
+      //! côté client, mettre à jour le serveur
       return true;
     }
     return false;

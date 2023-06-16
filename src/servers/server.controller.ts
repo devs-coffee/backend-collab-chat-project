@@ -35,7 +35,7 @@ export class ServerController {
     try {
       const servers = await this.serverService.findAll(req.user.id);
       response.isSucceed = true;
-      response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
+      response.result = servers;
       return response;
     } catch (error) {
       Logger.log(error);
@@ -108,7 +108,8 @@ export class ServerController {
       const createdServer = await this.serverService.create({...server, userId: req.user.id});
       if(createdServer) {
         result.isSucceed = true;
-        result.result = this.mapper.map(createdServer, ServerEntity, ServerDto);
+        result.result = createdServer;
+        //result.result = this.mapper.map(createdServer, ServerEntity, ServerDto);
       } else {
         throw new BadRequestException(errorConstant.serverNotCreated);
       }
@@ -191,7 +192,8 @@ export class ServerController {
       const updatedServer = await this.serverService.update(id, updateServerDto);
       if(updatedServer) {
         result.isSucceed = true;
-        result.result = this.mapper.map(updatedServer, ServerEntity, ServerDto);
+        result.result = updatedServer;
+        //result.result = this.mapper.map(updatedServer, ServerEntity, ServerDto);
       } else {
         result.result = null;
       }
