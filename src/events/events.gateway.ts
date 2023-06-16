@@ -5,9 +5,10 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  } from '@nestjs/websockets';
-  import { Logger } from '@nestjs/common';
-  import { Socket, Server } from 'socket.io';
+} from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
+import { Socket, Server } from 'socket.io';
+import { JwtService } from '@nestjs/jwt';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 
   @WebSocketGateway({
@@ -49,6 +50,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   
   handleConnection(client: Socket, ...args: any[]) {
     // client.handshake.auth.token to manage token
-    this.logger.log(`Client connected: ${client.id}`);
+    const token = client.handshake.auth.token;
+    const decodedToken = new JwtService().decode(token);
+    this.logger.log(`Client connected: ${decodedToken["pseudo"]}`);
   }
 }
