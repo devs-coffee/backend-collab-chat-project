@@ -46,12 +46,14 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
+    //client.data
   }
   
   handleConnection(client: Socket, ...args: any[]) {
-    // client.handshake.auth.token to manage token
     const token = client.handshake.auth.token;
     const decodedToken = new JwtService().decode(token);
     this.logger.log(`Client connected: ${decodedToken["pseudo"]}`);
+    //console.log(client.data);
+    //client.data.pseudo = decodedToken["pseudo"];
   }
 }
