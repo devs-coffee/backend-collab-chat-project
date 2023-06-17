@@ -10,6 +10,8 @@ import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { MessageDto } from '../dtos/messages/create-message.dto';
+import { ServerService } from '../servers/server.service';
+
 
   @WebSocketGateway({
   cors: {
@@ -20,7 +22,8 @@ import { MessageDto } from '../dtos/messages/create-message.dto';
 })
 
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  
+  constructor(private serverService: ServerService) {}
+
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('EventsGateway');
   
@@ -45,15 +48,29 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
   
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
-    //client.data
+    this.logger.log(`Client disconnected: ${client.data.pseudo}`);
+    for(let server of client.data.serverRooms) {
+      this.server.to(server).emit('userLeft', client.data.pseudo);
+    }
   }
   
-  handleConnection(client: Socket, ...args: any[]) {
+  async handleConnection(client: Socket) {
+    //* retrieve client token, decode it
     const token = client.handshake.auth.token;
     const decodedToken = new JwtService().decode(token);
     this.logger.log(`Client connected: ${decodedToken["pseudo"]}`);
-    //console.log(client.data);
-    //client.data.pseudo = decodedToken["pseudo"];
+    //* store client pseudo in sockat data, then create a room for him
+    client.data.pseudo = decodedToken["pseudo"];
+    client.join(`user_${decodedToken["userId"]}`);
+    ////console.log(client.nsp.adapter.rooms.get(`user_${decodedToken["userId"]}`));
+    //* get all the servers the user is a member of
+    //* then join the client to their room ( rooms will be created if not already existing )
+    const serverRooms = (await this.serverService.findAll(decodedToken["userId"])).map(server => `server_${server.id}`);
+    client.join(serverRooms);
+    client.data.serverRooms = serverRooms;
+    ////console.log(client.nsp.adapter.rooms);
+    for(let server of serverRooms) {
+      this.server.to(server).emit('userJoined', {pseudo: client.data.pseudo});
+    }
   }
 }
