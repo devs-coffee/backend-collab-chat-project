@@ -12,7 +12,6 @@ import { JwtService } from '@nestjs/jwt';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 import { ServerService } from '../servers/server.service';
 
-
   @WebSocketGateway({
   cors: {
     origin: '*',
@@ -68,9 +67,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const serverRooms = (await this.serverService.findAll(decodedToken["userId"])).map(server => `server_${server.id}`);
     client.join(serverRooms);
     client.data.serverRooms = serverRooms;
-    ////console.log(client.nsp.adapter.rooms);
     for(let server of serverRooms) {
       this.server.to(server).emit('userJoined', {pseudo: client.data.pseudo});
     }
+    //! control what happens when another client connects
+    console.log("\u001b[1;33m rooms : \u001b[1;0m\n", client.nsp.adapter.rooms); 
+    
   }
 }

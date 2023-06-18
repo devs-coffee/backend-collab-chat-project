@@ -9,7 +9,7 @@ import { MessageDto } from '../dtos/messages/create-message.dto';
 import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
 import { MessageEntity } from './entities/message.entity';
 import { MessagesService } from './messages.service';
-import { NotFoundError } from '@prisma/client/runtime';
+import { NotFoundError } from '@prisma/client/runtime/library';
 
 @Controller('messages')
 @ApiTags('messages')

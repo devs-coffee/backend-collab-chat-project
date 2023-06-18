@@ -11,7 +11,7 @@ import { Mapper } from '@automapper/core';
 import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 import { UserEntity } from '../users/entities/user.entity';
 import { UserDto } from '../dtos/users/user.dto';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/binary';
 
 @Controller('auth')
 @ApiTags('auth')

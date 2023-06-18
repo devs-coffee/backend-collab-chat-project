@@ -2,7 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { errorConstant } from '../constants/errors.constants';
 import { OperationResult } from '../core/OperationResult';
