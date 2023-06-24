@@ -2,6 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
 import { UserChannelEntity } from './entities/userChannel.entity';
 
@@ -19,9 +20,9 @@ export class ChannelService {
   }
 
   async findChannelsByUserId(userId: string) {
-    const { channels } = await this.prisma.user.findFirst({where : {id : userId}, include : { channels : { select : { channelId : true}}}});
-    const usersChannel = await this.prisma.channel.findMany({where : { id : { in : channels.map(c => c.channelId)}}, include : { users : { include : {user : true}}}});
-    return usersChannel;
+    const userChannels = await this.prisma.user.findFirst({where : {id : userId}, include : { channels : { select : { channelId : true}}}});
+    const usersChannel = await this.prisma.channel.findMany({where : { id : { in : userChannels && userChannels.channels.length > 0 && userChannels.channels.map(c => c.channelId) || []}}, include : { users : { include : {user : true}}}});
+    return usersChannel as ChannelEntity[];
   }
 
   async update(channelId: string, channelEntity: CreateChannelEntity) {
@@ -30,12 +31,14 @@ export class ChannelService {
 
   async remove(channelId: string, userId: string) {
     const channel = await this.prisma.channel.findFirst({where: { id: channelId }});
-    const userServer = await this.prisma.userServer.findFirst({where: { serverId : channel.serverId, userId}});
-    if (userServer.isAdmin){
-      await this.prisma.channel.delete({where : { id : channelId }});
-      return true;
+    if(channel){
+      const userServer = await this.prisma.userServer.findFirst({where: { serverId : channel.serverId!, userId}});
+      if (userServer && userServer.isAdmin){
+        await this.prisma.channel.delete({where : { id : channelId }});
+        return true;
+      }
+      return false;
     }
-
     return false;
   }
 

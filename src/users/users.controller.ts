@@ -76,7 +76,7 @@ export class UsersController {
   @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async findOne(@Param('id') id: string) {
-    const response = new OperationResult<UserDto>();
+    const response = new OperationResult<UserDto | null>();
     response.isSucceed = false;
     try {
       const user = await this.usersService.findOne(id);
@@ -104,7 +104,7 @@ export class UsersController {
   @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const result = new OperationResult<UserDto>();
+    const result = new OperationResult<UserDto | null>();
     result.isSucceed = false;
     try {
       const updatedUser = await this.usersService.update(id, updateUserDto);
