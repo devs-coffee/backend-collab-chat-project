@@ -3,7 +3,13 @@ pipeline {
     stages {
         stage('install') {
             steps {
-                echo 'Hello world!' 
+                git(
+                    url: "https://github.com/devs-coffee/backend-collab-chat-project",
+                    branch: "main",
+                    changelog: true,
+                    poll: true
+                )
+                echo "are we done?"
             }
         }
     }
