@@ -1,16 +1,16 @@
+import { Logger } from '@nestjs/common';
 import {
-  SubscribeMessage,
-  WebSocketGateway,
-  OnGatewayInit,
-  WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  } from '@nestjs/websockets';
-  import { Logger } from '@nestjs/common';
-  import { Socket, Server } from 'socket.io';
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 
-  @WebSocketGateway({
+@WebSocketGateway({
   cors: {
     origin: '*',
   },
