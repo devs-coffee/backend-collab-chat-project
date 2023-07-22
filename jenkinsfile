@@ -9,7 +9,7 @@ pipeline {
                     changelog: true,
                     poll: true
                 )
-                echo "are we done?"
+                echo "Are we done?"
             }
         }
     }
