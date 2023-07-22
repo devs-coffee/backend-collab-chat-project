@@ -28,7 +28,7 @@
 
 ## Prerequites
 
-make sure to have postgreSQL intalled
+make sure to have postgreSQL ( version 14 or higher ) intalled
 
 ## Installation
 
