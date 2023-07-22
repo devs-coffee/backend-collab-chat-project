@@ -28,8 +28,8 @@
 
 ## Prerequites
 
-make sure to have postgreSQL ( version 14 or higher ) intalled on your machine.
-Create a database for the projet.
+- make sure to have postgreSQL ( version 14 or higher ) intalled on your machine.
+- in postgreSQL, create a database for the projet.
 Create a .env file ( you can copy content from .env.sample ) with the proper values ( postgreSQL user, password, database...)
 
 ## Installation
