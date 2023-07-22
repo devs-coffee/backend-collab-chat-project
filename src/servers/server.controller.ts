@@ -15,6 +15,7 @@ import { UsersService } from '../users/users.service';
 import { ServerEntity } from './entities/server.entity';
 import { UserServerEntity } from './entities/user-server-entity';
 import { ServerService } from './server.service';
+import { FullServerEntity } from './entities/fullServer.entity';
 
 @Controller('servers')
 @ApiTags('servers')
@@ -35,7 +36,7 @@ export class ServerController {
     try {
       const servers = await this.serverService.findAll(req.user.id);
       response.isSucceed = true;
-      response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
+      response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);;
       return response;
     } catch (error) {
       Logger.log(error);
@@ -85,6 +86,9 @@ export class ServerController {
       return response;
     } catch (error) {
       Logger.log(error);
+      if(error instanceof BadRequestException){
+        throw error;
+      }
       throw new BadRequestException(errorConstant.errorOccured);
     }
   }
@@ -98,14 +102,14 @@ export class ServerController {
   @Post()
   @ApiCreatedResponse({ type: ServerDto })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async createServer(@Body() server: ServerDto, @Request() req) : Promise<OperationResult<ServerDto>> {
-    const result = new OperationResult<ServerDto>();
+  async createServer(@Body() server: ServerDto, @Request() req) : Promise<OperationResult<FullServerDto>> {
+    const result = new OperationResult<FullServerDto>();
     result.isSucceed = false;
     try {
       const createdServer = await this.serverService.create({...server, userId: req.user.id});
       if(createdServer) {
         result.isSucceed = true;
-        result.result = this.mapper.map(createdServer, ServerEntity, ServerDto);
+        result.result = this.mapper.map(createdServer, FullServerEntity, FullServerDto);
       } else {
         throw new BadRequestException(errorConstant.serverNotCreated);
       }
@@ -162,7 +166,7 @@ export class ServerController {
     try {
       const server = await this.serverService.findOne(id, req.user.id);
       response.isSucceed = true;
-      response.result = server;
+      response.result = this.mapper.map(server, FullServerEntity, FullServerDto);
       return response;
     } catch (error) {
       Logger.log(error);
@@ -188,7 +192,8 @@ export class ServerController {
       const updatedServer = await this.serverService.update(id, updateServerDto);
       if(updatedServer) {
         result.isSucceed = true;
-        result.result = this.mapper.map(updatedServer, ServerEntity, ServerDto);
+        result.result = updatedServer;
+        //result.result = this.mapper.map(updatedServer, ServerEntity, ServerDto);
       } else {
         result.result = null;
       }

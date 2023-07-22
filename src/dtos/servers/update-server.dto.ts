@@ -1,7 +1,6 @@
 import { AutoMap } from '@automapper/classes';
 import { PartialType } from '@nestjs/swagger';
 import { ServerDto } from './server.dto';
-import { ChannelEntity } from 'src/channels/entities/channel.entity';
 
 export class UpdateServerDto extends PartialType(ServerDto) {
     @AutoMap()

@@ -28,6 +28,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     this.server.emit(`message_${channelId}`, message);
   }
 
+  @SubscribeMessage('broadcastMessage')
+  handleUpdateMessage(messageId: string, message: MessageDto): void {
+    this.server.emit(`message_${messageId}`, message);
+  }
+
   @SubscribeMessage('private_room')
   handleRooms(client: Socket, payload: string): void {
     this.server.socketsJoin('private_room');

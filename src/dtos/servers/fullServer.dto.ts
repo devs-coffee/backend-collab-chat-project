@@ -15,4 +15,6 @@ export class FullServerDto extends ServerDto {
 
     @AutoMap()
     isCurrentUserAdmin: boolean = false;
+
+    isCurrentUserMember: boolean = false;
 }

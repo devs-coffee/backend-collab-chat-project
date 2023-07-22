@@ -9,6 +9,7 @@ import { MessageDto } from '../dtos/messages/create-message.dto';
 import { UpdateMessageDto } from '../dtos/messages/update.message.dto';
 import { MessageEntity } from './entities/message.entity';
 import { MessagesService } from './messages.service';
+import { NotFoundError } from '@prisma/client/runtime';
 
 @Controller('messages')
 @ApiTags('messages')
@@ -62,6 +63,9 @@ export class MessagesController {
       return result;
     } catch (error) {
         Logger.log(error);
+        if(error instanceof NotFoundError) {
+          throw new BadRequestException(errorConstant.userNotServerMember);
+        }
         throw new BadRequestException(errorConstant.errorOccured);
     }
   }
