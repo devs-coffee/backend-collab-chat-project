@@ -34,6 +34,7 @@ export class UsersController {
         response.isSucceed = true;
         response.result = this.mapper.mapArray(users, UserEntity, UserDto);
       } else {
+        response.isSucceed = true;
         response.result = [];
       }
       return response;
