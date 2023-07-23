@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-
+    name: build
     runs-on: ubuntu-latest
 
     strategy:
@@ -27,3 +27,15 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
+    
+    - uses: actions/checkout@v3
+    - name: send custom message with args
+      uses: appleboy/discord-action@master
+      with:
+        webhook_id: ${{ secrets.WEBHOOK_ID }}
+        webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
+        color: "#48f442"
+        username: "GitHub Bot"
+        message: "A new commit has been pushed, job finished with ${{ job.status }} status"
+
+    
