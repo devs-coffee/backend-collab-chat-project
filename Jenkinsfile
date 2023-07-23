@@ -15,7 +15,7 @@ pipeline {
 
         stage('install') {
             steps {
-                echo 'Hello guys!'
+                echo 'Hello there!'
                 sh '''
                     npm install
                 '''
