@@ -10,7 +10,6 @@ import { UserDto } from '../dtos/users/user.dto';
 import { User } from '@prisma/client';
 import { AutoMapping } from '../core/automapping';
 
-
 describe('UsersController', () => {
   let controller: UsersController;
   let usersService: UsersService;
