@@ -1,10 +1,6 @@
 pipeline {
     agent any
     
-    tools {
-        nodejs 'NodeJs18'
-    }
-
     stages {
         stage('Clean') {
             steps {
