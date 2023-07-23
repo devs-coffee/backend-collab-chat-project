@@ -38,7 +38,6 @@ describe('UsersController', () => {
     expect(mapper).toBeDefined();
   });
 
-
     it('should return an array of users', async () => {
       jest.spyOn(usersService, 'findAll').mockResolvedValue(USERSENTITY);
       const userDto: OperationResult<UserDto[]> = {
