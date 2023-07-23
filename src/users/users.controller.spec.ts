@@ -63,7 +63,6 @@ const USERS: UserDto[] = [
   }
 ];
 
-
 const USERSENTITY: User[] = [
   {
     id: '1c23dffd-cdf0-4e6b-95b9-be24e76d4815',
