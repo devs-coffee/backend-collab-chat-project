@@ -5,7 +5,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "TSK-SetupUnitTest-JBO-20230622" ]
+    branches: [ "TSK-SetupUnitTest-20230622" ]
 
 jobs:
   build:
