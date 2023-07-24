@@ -35,8 +35,10 @@ export class ServerController {
     response.isSucceed = false;
     try {
       const servers = await this.serverService.findAll(req.user.id);
-      response.isSucceed = true;
-      response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);;
+      if(servers){
+        response.isSucceed = true;
+        response.result = this.mapper.mapArray(servers, ServerEntity, ServerDto);
+      }
       return response;
     } catch (error) {
       Logger.log(error);
@@ -100,7 +102,7 @@ export class ServerController {
    */
   @UseGuards(JwtAuthGuard)
   @Post()
-  @ApiCreatedResponse({ type: ServerDto })
+  @ApiCreatedResponse({ type: FullServerDto })
   @ApiBadRequestResponse({ type : BadRequestException})
   async createServer(@Body() server: ServerDto, @Request() req) : Promise<OperationResult<FullServerDto>> {
     const result = new OperationResult<FullServerDto>();
@@ -158,7 +160,7 @@ export class ServerController {
    */
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  @ApiOkResponse({ type: ServerDto })
+  @ApiOkResponse({ type: FullServerDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async findOne(@Param('id') id: string, @Request() req) {
     const response = new OperationResult<FullServerDto>();
@@ -185,15 +187,14 @@ export class ServerController {
   @ApiOkResponse({ type: UpdateServerDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto, @Request() req) {
-    const result = new OperationResult<UpdateServerDto>();
+    const result = new OperationResult<UpdateServerDto | null>();
     result.isSucceed = false;
     try {
       updateServerDto.userId = req.user.id;
       const updatedServer = await this.serverService.update(id, updateServerDto);
       if(updatedServer) {
         result.isSucceed = true;
-        result.result = updatedServer;
-        //result.result = this.mapper.map(updatedServer, ServerEntity, ServerDto);
+        result.result = this.mapper.map(updatedServer, FullServerEntity, FullServerDto);
       } else {
         result.result = null;
       }

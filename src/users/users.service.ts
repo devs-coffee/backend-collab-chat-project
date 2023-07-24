@@ -18,7 +18,7 @@ export class UsersService {
   }
 
   findAll(idList?: string) {
-    let idArray = [];
+    let idArray: string[] = [];
       if(idList) {
         idArray = idList.split(',');
       }
@@ -39,7 +39,7 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto) {
     if(updateUserDto.password){
       const user = await this.findOne(id);
-      if(user){
+      if(user && updateUserDto.oldPassword){
         const match = await bcrypt.compare(updateUserDto.oldPassword, user.password);
         if(match){
           updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);

@@ -7,6 +7,7 @@ import { MessageDto } from '../dtos/messages/create-message.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { MessageCreateEntity } from './entities/message.create.entity';
 import { EventsGateway } from '../events/events.gateway';
+import { MessageEntity } from './entities/message.entity';
 
 @Injectable()
 export class MessagesService {
@@ -28,17 +29,19 @@ export class MessagesService {
             channelId : channelId
           },
           {
-            userId : messageDto.toUserId,
+            userId : messageDto.toUserId!,
             channelId: channelId
           }
         ]
       })
     }
-    const serverId = await this.prisma.channel.findUnique({where: {id: channelId}, select: {serverId: true}});
-    await this.prisma.userServer.findFirstOrThrow({where : {AND: [serverId, {userId: message.userId}]}});
+    const channel = await this.prisma.channel.findUnique({where: {id: channelId}});
+    if(channel && channel.serverId){
+      await this.prisma.userServer.findFirstOrThrow({where : {AND: [{serverId: channel.serverId}, {userId: message.userId}]}});
+    }
     const created = await this.prisma.message.create({data : {...message, channelId}});
     this.eventsGateway.handleMessage(channelId, created);
-    return await this.prisma.message.findFirst({where: {id: created.id}, include: { user: true }});
+    return await this.prisma.message.findFirst({where: {id: created.id}, include: { user: true }}) as MessageEntity;
   }
 
   async getMyMessagesByChannelId(channelId: string, offset?: string){
