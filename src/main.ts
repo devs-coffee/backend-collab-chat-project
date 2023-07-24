@@ -3,9 +3,23 @@ import * as bodyParser from 'body-parser';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { readFileSync } from 'fs';
+import { AppCreationOptions } from './interfaces/IAppCreationOptions';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  let options: AppCreationOptions = { cors: true };
+  if(process.env.ENABLE_HTTPS === 'true') {
+    options.httpsOptions = {
+      cert: readFileSync('/user/src/app/ssl/fullchain1.pem'),
+      key: readFileSync('/user/src/app/ssl/privkey1.pem')
+    }
+  }
+  // const httpsOptions = {
+  //   cert: readFileSync('./fullchain1.pem'),
+  //   key: readFileSync('./privkey1.pem')
+  // }
+  console.log("options : ", options);
+  const app = await NestFactory.create(AppModule, options);
   app.use(bodyParser.json({limit: '50mb'}));
   app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
   app.useGlobalPipes(new ValidationPipe());
