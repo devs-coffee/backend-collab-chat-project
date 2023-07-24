@@ -8,6 +8,7 @@ import { AuthenticationController } from './authentication.controller';
 import { jwtConstants } from '../constants/auth.constants';
 import { JwtModule } from '@nestjs/jwt';
 import { ServersModule } from '../servers/servers.module';
+import { AutoMapping } from '../core/automapping';
 
 @Module({
     controllers: [AuthenticationController],

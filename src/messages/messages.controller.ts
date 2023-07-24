@@ -81,7 +81,7 @@ export class MessagesController {
   @ApiCreatedResponse({ type: UpdateMessageDto })
   @ApiBadRequestResponse({ type : BadRequestException})
   async update(@Param('messageId') messageId: string, @Body() updateMessageDto: UpdateMessageDto, @Request() req) {
-    const result = new OperationResult<UpdateMessageDto>();
+    const result = new OperationResult<UpdateMessageDto | null>();
     result.isSucceed = false;
     try {
       updateMessageDto.userId = req.user.id;

@@ -2,7 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { errorConstant } from '../constants/errors.constants';
 import { OperationResult } from '../core/OperationResult';
@@ -34,6 +34,7 @@ export class UsersController {
         response.isSucceed = true;
         response.result = this.mapper.mapArray(users, UserEntity, UserDto);
       } else {
+        response.isSucceed = true;
         response.result = [];
       }
       return response;
@@ -76,7 +77,7 @@ export class UsersController {
   @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async findOne(@Param('id') id: string) {
-    const response = new OperationResult<UserDto>();
+    const response = new OperationResult<UserDto | null>();
     response.isSucceed = false;
     try {
       const user = await this.usersService.findOne(id);
@@ -104,7 +105,7 @@ export class UsersController {
   @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const result = new OperationResult<UserDto>();
+    const result = new OperationResult<UserDto | null>();
     result.isSucceed = false;
     try {
       const updatedUser = await this.usersService.update(id, updateUserDto);

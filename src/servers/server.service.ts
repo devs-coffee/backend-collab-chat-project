@@ -28,7 +28,7 @@ export class ServerService {
         for(let server of servers) {
           server.isCurrentUserMember = true;
           const userServer = await this.prisma.userServer.findFirst({where: {AND: [{userId}, {serverId: server.id}]}});
-          server.isCurrentUserAdmin = userServer.isAdmin;
+          server.isCurrentUserAdmin = userServer?.isAdmin;
         }
         return servers;
     }
@@ -45,7 +45,7 @@ export class ServerService {
 
   async update(id: string, updateServerDto: UpdateServerDto) {
     const userServer = await this.prisma.userServer.findFirst({ where: { serverId: id, userId : updateServerDto.userId }});
-    if(userServer.isAdmin){
+    if(userServer?.isAdmin){
       const serverToUpdate = this.mapper.map(updateServerDto, UpdateServerDto, ServerEntity);  
       const updated = await this.prisma.server.update({
         where: { id },

@@ -89,7 +89,7 @@ export class ChannelController {
 
   @UseGuards(JwtAuthGuard)
   @Get(":serverid")
-  @ApiCreatedResponse({ type: ChannelServerDto, isArray : true })
+  @ApiOkResponse({ type: ChannelServerDto, isArray : true })
   @ApiBadRequestResponse({ type : BadRequestException})
   async getChannels(@Param('serverid') id: string) : Promise<OperationResult<ChannelServerDto>> {
     const result = new OperationResult<ChannelServerDto>();
@@ -110,33 +110,11 @@ export class ChannelController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(":channelId")
-  @ApiCreatedResponse({ type: ServerEntity, isArray : true })
-  @ApiBadRequestResponse({ type : BadRequestException})
-  async updateChannels(@Param('channelId') id: string) : Promise<OperationResult<ServerEntity>> {
-    const result = new OperationResult<ServerEntity>();
-    result.isSucceed = false;
-    try {
-      const channels = await this.channelService.findChannelsByServerId(id);
-      if(channels) {
-        result.isSucceed = true;
-        result.result = channels;
-      } else {
-        throw new BadRequestException(errorConstant.serverNotCreated);
-      }
-      return result;
-    } catch (error) {
-        Logger.log(error);
-        throw new BadRequestException(errorConstant.errorOccured);
-    }
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Put(":channelId")
   @ApiCreatedResponse({ type: UpdateChannelDto })
   @ApiBadRequestResponse({ type : BadRequestException})
   async update(@Param('channelId') channelId: string, @Body() updateChannelDto: UpdateChannelDto, @Request() req) {
-    const result = new OperationResult<UpdateChannelDto>();
+    const result = new OperationResult<UpdateChannelDto | null>();
     result.isSucceed = false;
     try {
       const channelToUpdate = this.mapper.map(updateChannelDto, UpdateChannelDto, CreateChannelEntity)

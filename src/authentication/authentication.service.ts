@@ -18,7 +18,7 @@ export class AuthenticationService {
 
   constructor(private readonly usersService: UsersService, private readonly jwtService: JwtService, @InjectMapper() private readonly classMapper: Mapper, private readonly serverService: ServerService) {}
 
-  async signin(signinUser : SigninUserDto): Promise<LoginSignupResponse> | null {
+  async signin(signinUser : SigninUserDto): Promise<LoginSignupResponse | null> {
     const response = new LoginSignupResponse();
     const user = await this.usersService.findByEmail(signinUser);
     if (user && await bcrypt.compare(signinUser.password, user.password)) {
@@ -30,7 +30,7 @@ export class AuthenticationService {
     return null;
   }
 
-  async signup(user : CreateUserDto): Promise<LoginSignupResponse> | null {
+  async signup(user : CreateUserDto): Promise<LoginSignupResponse | null> {
     const response = new LoginSignupResponse();
     if(user.password && user.password === user.passwordConfirm) {
         user.password = await bcrypt.hash(user.password, this.saltRound)
