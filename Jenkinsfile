@@ -39,6 +39,7 @@ pipeline {
                     npm run build
                     rm -r /var/www/codevert/backend/dist
                     cp -r dist/ /var/www/codevert/backend/dist
+                    cp /var/www/codevert/backend/.env .
                     docker build -t whitedog/node-web-app:latest .
                     docker service update --force codevert_backend
                 '''
