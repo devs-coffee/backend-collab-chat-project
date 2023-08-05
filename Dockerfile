@@ -14,7 +14,5 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-COPY prisma_files ./prisma
-
 EXPOSE 4200
 CMD [ "npm", "run", "start" ]
