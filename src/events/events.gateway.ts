@@ -23,6 +23,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('EventsGateway');
   
+  
   @SubscribeMessage('broadcastMessage')
   handleMessage(channelId: string, message: MessageDto): void {
     this.server.emit(`message_${channelId}`, message);
@@ -40,7 +41,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
   
   afterInit(server: Server) {
-    this.logger.log('Init');
+    this.logger.log('Events gateway started');
   }
   
   handleDisconnect(client: Socket) {

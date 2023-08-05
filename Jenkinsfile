@@ -32,5 +32,16 @@ pipeline {
                 '''
             }
         }
+
+        stage('Update ') {
+            steps {
+                sh '''
+                    npm run build
+                    rm -r /var/www/codevert/backend/dist
+                    cp -r build/ /var/www/codevert/dist
+                    docker service update --force codevert_backend
+                '''
+            }
+        }
     }
 }
