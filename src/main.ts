@@ -14,10 +14,6 @@ async function bootstrap() {
       key: readFileSync('/user/src/app/ssl/privkey1.pem')
     }
   }
-  // const httpsOptions = {
-  //   cert: readFileSync('./fullchain1.pem'),
-  //   key: readFileSync('./privkey1.pem')
-  // }
   console.log("options : ", options);
   const app = await NestFactory.create(AppModule, options);
   app.use(bodyParser.json({limit: '50mb'}));
