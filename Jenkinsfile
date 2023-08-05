@@ -38,7 +38,7 @@ pipeline {
                 sh '''
                     npm run build
                     rm -r /var/www/codevert/backend/dist
-                    cp -r build/ /var/www/codevert/dist
+                    cp -r dist/ /var/www/codevert/dist
                     docker service update --force codevert_backend
                 '''
             }
