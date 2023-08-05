@@ -58,18 +58,21 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     //* retrieve client token, decode it
     const token = client.handshake.auth.token;
     const decodedToken = new JwtService().decode(token);
-    this.logger.log(`Client connected: ${decodedToken["pseudo"]}`);
+    this.logger.log(`Client connected: ${decodedToken?.["pseudo"]}`);
     //* store client pseudo in sockat data, then create a room for him
-    client.data.pseudo = decodedToken["pseudo"];
-    client.join(`user_${decodedToken["userId"]}`);
+    client.data.pseudo = decodedToken?.["pseudo"];
+    client.join(`user_${decodedToken?.["userId"]}`);
     ////console.log(client.nsp.adapter.rooms.get(`user_${decodedToken["userId"]}`));
     //* get all the servers the user is a member of
     //* then join the client to their room ( rooms will be created if not already existing )
-    const serverRooms = (await this.serverService.findAll(decodedToken["userId"])).map(server => `server_${server.id}`);
-    client.join(serverRooms);
-    client.data.serverRooms = serverRooms;
-    for(let server of serverRooms) {
-      this.server.to(server).emit('userJoined', {pseudo: client.data.pseudo});
+    let serverRooms = await this.serverService.findAll(decodedToken?.["userId"]);
+    if(serverRooms && Array.isArray(serverRooms) && serverRooms.length > 0){
+      let rooms = serverRooms.map(server => `server_${server.id}`);
+      client.join(rooms);
+      client.data.serverRooms = serverRooms;
+      for(let server of rooms) {
+        this.server.to(server).emit('userJoined', {pseudo: client.data.pseudo});
+      }    
     }
     //! control what happens when another client connects
     console.log("\u001b[1;33m rooms : \u001b[1;0m\n", client.nsp.adapter.rooms); 
