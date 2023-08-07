@@ -55,7 +55,7 @@ export class ServerController {
   @Get(":serverId/users")
   @ApiOkResponse({ type: UserDto, isArray: true })
   @ApiBadRequestResponse({type: BadRequestException })
-  async GetAllUserByServerId(@Request() req, @Param('serverId') serverId: string) : Promise<OperationResult<UserDto[]>> {
+  async GetAllUserByServerId(@Param('serverId') serverId: string) : Promise<OperationResult<UserDto[]>> {
     const response = new OperationResult<UserDto[]>();
     response.isSucceed = false;
     try {

@@ -1,3 +1,0 @@
-interface IPrefs {
-    colorScheme: string
-}
