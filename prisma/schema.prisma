@@ -18,6 +18,14 @@ model User {
   servers   UserServer[]
   channels  UserChannel[]
   messages  Message[]
+  pref      UserPrefs?
+}
+
+model UserPrefs {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user          User    @relation(fields: [userId], references: [id])
+  userId        String  @unique @db.Uuid
+  colorScheme   String
 }
 
 model Server {
@@ -58,7 +66,7 @@ model UserChannel {
   userId    String   @db.Uuid
   channelId String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -69,7 +77,7 @@ model Message {
   channelId String   @db.Uuid 
   channel   Channel  @relation(fields: [channelId], references: [id]) 
   userId    String   @db.Uuid
-  user    User       @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
