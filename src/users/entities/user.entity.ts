@@ -1,6 +1,7 @@
 import { User } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import { PrefsDto } from 'src/dtos/users/prefs.dto';
 
 export class UserEntity implements User {
     @AutoMap()
@@ -28,4 +29,7 @@ export class UserEntity implements User {
 
     @ApiProperty()
     updatedAt: Date;
+
+    @ApiProperty()
+    pref: PrefsDto
 }

@@ -37,7 +37,7 @@ export class AutoMapping extends AutomapperProfile {
         return (mapper) => {
             //users
             createMap(mapper, CreateUserDto, UserEntity);
-            createMap(mapper, UserEntity, UserDto);
+            createMap(mapper, UserEntity, UserDto, forMember(user => user.prefs, mapFrom(u => u.pref)));
             createMap(mapper, UserEntity, LoginSignupResponse);
             createMap(mapper, CreateUserDto, UserDto);
             createMap(mapper, UpdateUserDto, UserEntity);
