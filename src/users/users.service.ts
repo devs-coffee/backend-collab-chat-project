@@ -30,11 +30,11 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    return this.prisma.user.findUnique({ where: { id }, include: {pref: {select: {colorScheme: true}}}});
+    return this.prisma.user.findUnique({ where: { id }, include: {prefs: {select: {colorScheme: true}}}});
   }
 
   findByEmail(signinUserDto: SigninUserDto) {
-    return this.prisma.user.findFirst({ where: {email : signinUserDto.email }, include: {pref: {select: {colorScheme: true}}}});
+    return this.prisma.user.findFirst({ where: {email : signinUserDto.email }, include: {prefs: {select: {colorScheme: true}}}});
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {

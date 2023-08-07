@@ -31,5 +31,5 @@ export class UserEntity implements User {
     updatedAt: Date;
 
     @ApiProperty()
-    pref: PrefsDto
+    prefs: PrefsDto
 }
