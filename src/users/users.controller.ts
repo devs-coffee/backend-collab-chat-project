@@ -105,15 +105,16 @@ export class UsersController {
   @Put('prefs')
   @ApiOkResponse({ type: Boolean })
   @ApiBadRequestResponse({type: BadRequestException})
-  async updatePrefs(@Body() prefsDto: PrefsDto, @Request() req) : Promise<OperationResult<boolean>> {
-    const response = new OperationResult<boolean>();
+  async updatePrefs(@Body() prefsDto: PrefsDto, @Request() req) : Promise<OperationResult<PrefsDto | null>> {
+    const response = new OperationResult<PrefsDto | null>();
     response.isSucceed = false;
-    response.result = false;
+    response.result = null;
     try {
       const serviceResponse = await this.usersService.updatePrefs(req.user.id, prefsDto);
-      if(serviceResponse!) {
+      if(serviceResponse) {
+        console.log(serviceResponse);
         response.isSucceed = true;
-        response.result = true;
+        response.result = serviceResponse;
       }
       return response;
     } catch (error) {
