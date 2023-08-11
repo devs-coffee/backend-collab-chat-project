@@ -1,5 +1,5 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import { createMap, forMember, ignore, mapFrom, Mapper, MappingProfile, mapWith } from '@automapper/core';
+import { createMap, forMember, mapFrom, Mapper, MappingProfile, mapWith } from '@automapper/core';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/users/create-user.dto';
 import { UserEntity } from '../users/entities/user.entity';
@@ -37,7 +37,7 @@ export class AutoMapping extends AutomapperProfile {
         return (mapper) => {
             //users
             createMap(mapper, CreateUserDto, UserEntity);
-            createMap(mapper, UserEntity, UserDto);
+            createMap(mapper, UserEntity, UserDto, forMember(user => user.prefs, mapFrom(u => u.prefs)));
             createMap(mapper, UserEntity, LoginSignupResponse);
             createMap(mapper, CreateUserDto, UserDto);
             createMap(mapper, UpdateUserDto, UserEntity);

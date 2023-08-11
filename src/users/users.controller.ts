@@ -1,8 +1,9 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Put, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+import { PrefsDto } from 'src/dtos/users/prefs.dto';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { errorConstant } from '../constants/errors.constants';
 import { OperationResult } from '../core/OperationResult';
@@ -14,6 +15,9 @@ import { UsersService } from './users.service';
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
+  private logger: Logger = new Logger('userController');
+
+  
   constructor(private readonly usersService: UsersService, @InjectMapper() private readonly mapper: Mapper) {}
 
   /**
@@ -95,6 +99,41 @@ export class UsersController {
   }
 
   /**
+   * Save user preferences
+   */
+  @UseGuards(JwtAuthGuard)
+  @Put('prefs')
+  @ApiOkResponse({ type: Boolean })
+  @ApiBadRequestResponse({type: BadRequestException})
+  async updatePrefs(@Body() prefsDto: PrefsDto, @Request() req) : Promise<OperationResult<PrefsDto | null>> {
+    const response = new OperationResult<PrefsDto | null>();
+    response.isSucceed = false;
+    response.result = null;
+    try {
+      const serviceResponse = await this.usersService.updatePrefs(req.user.id, prefsDto);
+      if(serviceResponse) {
+        console.log(serviceResponse);
+        response.isSucceed = true;
+        response.result = serviceResponse;
+      }
+      return response;
+    } catch (error) {
+      if(error instanceof PrismaClientValidationError) {
+        if(error.message.includes('Argument colorScheme')) {
+          this.logger.log(error.message.substring(error.message.indexOf('Argument')));
+          throw new BadRequestException(error.message.substring(error.message.indexOf('Argument')));
+        }
+        if(error.message.includes('Unknown arg')) {
+          this.logger.log(error.message.substring(error.message.indexOf('Unknown arg'), error.message.indexOf('for type UserPrefsUpdateInput') -1));
+          throw new BadRequestException(error.message.substring(error.message.indexOf('Unknown arg'), error.message.indexOf('for type UserPrefsUpdateInput') -1));
+        }
+
+      }
+      throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  /**
    * put a user by id
    * @param id id of user to update
    * @param updateUserDto new user's data
@@ -147,4 +186,6 @@ export class UsersController {
       throw new BadRequestException(errorConstant.errorOccured);
     }
   }
+
+  
 }

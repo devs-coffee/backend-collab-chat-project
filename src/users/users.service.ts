@@ -8,6 +8,7 @@ import { errorConstant } from '../constants/errors.constants';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { UserEntity } from './entities/user.entity';
+import { PrefsDto } from '../dtos/users/prefs.dto';
 
 @Injectable()
 export class UsersService {
@@ -29,11 +30,11 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    return this.prisma.user.findUnique({ where: { id }});
+    return this.prisma.user.findUnique({ where: { id }, include: {prefs: {select: {colorScheme: true}}}});
   }
 
   findByEmail(signinUserDto: SigninUserDto) {
-    return this.prisma.user.findFirst({ where: {email : signinUserDto.email }});
+    return this.prisma.user.findFirst({ where: {email : signinUserDto.email }, include: {prefs: {select: {colorScheme: true}}}});
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
@@ -67,5 +68,13 @@ export class UsersService {
   async searchUser(name: string){
     const users = await this.prisma.user.findMany({ where : { pseudo : {contains: name.toLowerCase()}}, orderBy : { pseudo : 'asc'}});
     return users;
+  }
+
+  async updatePrefs(userId: string, prefs: PrefsDto) {
+    const oldPrefs = await this.prisma.userPrefs.findUnique({where: {userId}});
+    if(oldPrefs == null) {
+      return await this.prisma.userPrefs.create({data: {userId, ...prefs}});
+    }
+    return await this.prisma.userPrefs.update({where: {id: oldPrefs.id}, data: prefs});
   }
 }
