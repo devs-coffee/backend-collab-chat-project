@@ -2,7 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
 import { PrefsDto } from 'src/dtos/users/prefs.dto';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { errorConstant } from '../constants/errors.constants';
@@ -118,9 +118,16 @@ export class UsersController {
       }
       return response;
     } catch (error) {
-      this.logger.log(error);
-      if(error instanceof BadRequestException) {
-        throw error;
+      if(error instanceof PrismaClientValidationError) {
+        if(error.message.includes('Argument colorScheme')) {
+          this.logger.log(error.message.substring(error.message.indexOf('Argument')));
+          throw new BadRequestException(error.message.substring(error.message.indexOf('Argument')));
+        }
+        if(error.message.includes('Unknown arg')) {
+          this.logger.log(error.message.substring(error.message.indexOf('Unknown arg'), error.message.indexOf('for type UserPrefsUpdateInput') -1));
+          throw new BadRequestException(error.message.substring(error.message.indexOf('Unknown arg'), error.message.indexOf('for type UserPrefsUpdateInput') -1));
+        }
+
       }
       throw new BadRequestException(errorConstant.errorOccured);
     }

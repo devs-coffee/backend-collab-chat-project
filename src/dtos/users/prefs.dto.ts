@@ -1,7 +1,9 @@
 import { AutoMap } from "@automapper/classes";
 import { ApiProperty } from "@nestjs/swagger";
+import { ColorScheme } from "@prisma/client";
 
 export class PrefsDto {
     @ApiProperty()
-    colorScheme: string;
+    @AutoMap()
+    colorScheme: ColorScheme;
 }
