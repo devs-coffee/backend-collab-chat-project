@@ -62,9 +62,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.data.pseudo}`);
-    if(client.data.serverRooms)
-    for(let server of client.data.serverRooms) {
-      this.server.to(server).emit('userLeft', client.data.pseudo);
+    if(client.data.serverRooms) {
+      for(let server of client.data.serverRooms) {
+        this.server.to(server).emit('userLeft', {pseudo: client.data.pseudo, id: client.data.userId});
+      }
     }
   }
   
@@ -84,9 +85,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if(serverRooms && Array.isArray(serverRooms) && serverRooms.length > 0){
       let rooms = serverRooms.map(server => `server_${server.id}`);
       client.join(rooms);
-      client.data.serverRooms = serverRooms;
+      client.data.serverRooms = rooms;
       for(let server of rooms) {
-        this.server.to(server).emit('userJoined', {pseudo: client.data.pseudo});
+        this.server.to(server).emit('userJoined', {pseudo: client.data.pseudo, id: client.data.userId});
       }    
     }
     //! control what happens when another client connects
