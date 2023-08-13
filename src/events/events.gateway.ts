@@ -42,6 +42,19 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     this.server.socketsJoin('private_room');
     this.server.emit("joined_private_room", {message : "joined provate room"})
   }
+
+  @SubscribeMessage('getServerConnectedUsers')
+  async handleGetServerUsers(client: Socket, payload: any): Promise<void> {
+    //this.logger.log('getUsers called');
+    const connectedUsers = await this.server.in(`server_${payload.serverId}`).fetchSockets();
+    let idList: any[] = [];
+    if(connectedUsers) {
+      for(let socket of connectedUsers) {
+        idList.push(socket.data.userId);
+      }
+    }
+    this.server.to(client.id).emit('serverUserList', {userList: idList});
+  }
   
   afterInit(server: Server) {
     this.logger.log('Events gateway started');
@@ -49,8 +62,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.data.pseudo}`);
-    for(let server of client.data.serverRooms) {
-      this.server.to(server).emit('userLeft', client.data.pseudo);
+    if(client.data.serverRooms) {
+      for(let server of client.data.serverRooms) {
+        this.server.to(server).emit('userLeft', {pseudo: client.data.pseudo, id: client.data.userId});
+      }
     }
   }
   
@@ -61,6 +76,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     this.logger.log(`Client connected: ${decodedToken?.["pseudo"]}`);
     //* store client pseudo in sockat data, then create a room for him
     client.data.pseudo = decodedToken?.["pseudo"];
+    client.data.userId = decodedToken?.["userId"];
     client.join(`user_${decodedToken?.["userId"]}`);
     ////console.log(client.nsp.adapter.rooms.get(`user_${decodedToken["userId"]}`));
     //* get all the servers the user is a member of
@@ -69,9 +85,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if(serverRooms && Array.isArray(serverRooms) && serverRooms.length > 0){
       let rooms = serverRooms.map(server => `server_${server.id}`);
       client.join(rooms);
-      client.data.serverRooms = serverRooms;
+      client.data.serverRooms = rooms;
       for(let server of rooms) {
-        this.server.to(server).emit('userJoined', {pseudo: client.data.pseudo});
+        this.server.to(server).emit('userJoined', {pseudo: client.data.pseudo, id: client.data.userId});
       }    
     }
     //! control what happens when another client connects
