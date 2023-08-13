@@ -143,11 +143,11 @@ export class UsersController {
   @Put(':id')
   @ApiOkResponse({ type: UserDto })
   @ApiBadRequestResponse({type: BadRequestException})
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req) {
     const result = new OperationResult<UserDto | null>();
     result.isSucceed = false;
     try {
-      const updatedUser = await this.usersService.update(id, updateUserDto);
+      const updatedUser = await this.usersService.update(req.user.id, id, updateUserDto);
       if(updatedUser) {
         result.isSucceed = true;
         result.result = this.mapper.map(updatedUser, UserEntity, UserDto);
@@ -159,6 +159,9 @@ export class UsersController {
         Logger.log(error);
         if(error instanceof PrismaClientKnownRequestError  && error.message.includes("Unique constraint failed on the fields: (`pseudo`)")) {
           throw new BadRequestException(errorConstant.pseudoUnavailable);
+        }
+        if(error instanceof BadRequestException) {
+          throw error;
         }
         throw new BadRequestException(errorConstant.errorOccured);
     }

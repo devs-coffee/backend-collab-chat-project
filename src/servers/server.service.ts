@@ -56,7 +56,7 @@ export class ServerService {
       updated.isCurrentUserMember = true;
       return updated;
     }
-    return new Error(errorConstant.noUserRights);
+    return new Error(errorConstant.noUserRightsOnServer);
   }
 
   async remove(id: string, userId: string) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { SigninUserDto } from '../dtos/users/signin-user-dto';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -37,7 +37,11 @@ export class UsersService {
     return this.prisma.user.findFirst({ where: {email : signinUserDto.email }, include: {prefs: {select: {colorScheme: true}}}});
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(reqUserId: string, id: string, updateUserDto: UpdateUserDto) {
+    //control user rights
+    if(reqUserId !== id) {
+      throw new BadRequestException(errorConstant.noUserRightsOnUser);
+    }
     if(updateUserDto.password){
       const user = await this.findOne(id);
       if(user && updateUserDto.oldPassword){
