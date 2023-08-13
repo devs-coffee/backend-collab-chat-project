@@ -176,16 +176,19 @@ export class UsersController {
   @Delete(':id')
   @ApiOkResponse({ type: Boolean })
   @ApiBadRequestResponse({type: BadRequestException})
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @Request() req) {
     const response = new OperationResult<boolean>();
     response.isSucceed = false;
     try {
-      await this.usersService.remove(id);
+      await this.usersService.remove(req.user.id, id);
       response.isSucceed = true;
       response.result = true;
       return response;
     } catch (error) {
       Logger.log(error);
+      if(error instanceof BadRequestException) {
+        throw error;
+      }
       throw new BadRequestException(errorConstant.errorOccured);
     }
   }

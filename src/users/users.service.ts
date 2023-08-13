@@ -61,7 +61,11 @@ export class UsersService {
     });
   }
 
-  remove(id: string) {
+  remove(reqUserId, id: string) {
+    //control user rights
+    if(reqUserId !== id) {
+      throw new BadRequestException(errorConstant.noUserRightsOnUser);
+    }
     return this.prisma.user.delete({ where: { id } });
   }
 
