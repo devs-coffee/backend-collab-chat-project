@@ -192,6 +192,4 @@ export class UsersController {
       throw new BadRequestException(errorConstant.errorOccured);
     }
   }
-
-  
 }
