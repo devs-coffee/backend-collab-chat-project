@@ -1,8 +1,8 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import { EventsGateway } from '../events/events.gateway';
 import { errorConstant } from '../constants/errors.constants';
-import { FullServerDto } from '../dtos/servers/fullServer.dto';
 import { ServerDto } from '../dtos/servers/server.dto';
 import { UpdateServerDto } from '../dtos/servers/update-server.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,6 +13,9 @@ import { UserServerEntity } from './entities/user-server-entity';
 @Injectable()
 export class ServerService {
   constructor(private prisma: PrismaService, @InjectMapper() readonly mapper : Mapper)  {}
+
+  @Inject(forwardRef(() => EventsGateway))
+  private readonly eventsGateway: EventsGateway
 
   async create(server: ServerDto) {
     const serverEntity = this.mapper.map(server, ServerDto, ServerEntity);
