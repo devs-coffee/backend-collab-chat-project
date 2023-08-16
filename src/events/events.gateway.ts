@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 import { ServerService } from '../servers/server.service';
 
+
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -25,7 +26,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('EventsGateway');
-  
   
   @SubscribeMessage('broadcastMessage')
   handleMessage(channelId: string, message: MessageDto): void {
@@ -58,6 +58,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   
   afterInit(server: Server) {
     this.logger.log('Events gateway started');
+    // console.log(this.server['server'].engine.generateId);
+    // this.server['server'].engine.generateId = (req => {
+    //   console.log(req.handshake);
+    //   const token = req.handshake.auth.token;
+    //   const decodedToken = new JwtService().decode(token);
+    //   return decodedToken!['userId'];
+    // })
   }
   
   handleDisconnect(client: Socket) {
