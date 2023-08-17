@@ -9,6 +9,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { FullServerEntity } from './entities/fullServer.entity';
 import { ServerEntity } from './entities/server.entity';
 import { UserServerEntity } from './entities/user-server-entity';
+import { UserDto } from '../dtos/users/user.dto';
+import { UserEntity } from '../users/entities/user.entity';
 
 @Injectable()
 export class ServerService {
@@ -86,18 +88,23 @@ export class ServerService {
     return servers;
   }
 
-  async joinOrLeave(server: UserServerEntity) {
-    const hasAlreadyJoined = await this.prisma.userServer.findFirst({where : {AND : [{ serverId : server.serverId}, {userId : server.userId}]}});
+  async joinOrLeave(userServer: UserServerEntity) {
+    const hasAlreadyJoined = await this.prisma.userServer.findFirst({where : {AND : [{ serverId : userServer.serverId}, {userId : userServer.userId}]}});
+    const userEntity = await this.prisma.user.findUnique({where: {id: userServer.userId}});
+    const user = this.mapper.map(userEntity, UserEntity, UserDto);
     if(hasAlreadyJoined !== null){
-      const serverAdmins = await this.prisma.userServer.findMany({where: {AND : [{ serverId: server.serverId}, {isAdmin: true}]}});
-      if(serverAdmins.length < 2 && serverAdmins[0].userId === server.userId) {
+      const serverAdmins = await this.prisma.userServer.findMany({where: {AND : [{ serverId: userServer.serverId}, {isAdmin: true}]}});
+      if(serverAdmins.length < 2 && serverAdmins[0].userId === userServer.userId) {
         throw new BadRequestException(errorConstant.lastAdminCannotLeave);
       }
       await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}});
+      
+      this.eventsGateway.handleLeaveServer(user!, userServer.serverId);
       return false;
     }
-    const joinedServer = await this.prisma.userServer.create({data: server});
+    const joinedServer = await this.prisma.userServer.create({data: userServer});
     if(joinedServer){
+      this.eventsGateway.handleJoinServer(user, userServer.serverId);
       return true;
     }
     return false;
