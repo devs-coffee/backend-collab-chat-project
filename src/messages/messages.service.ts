@@ -1,6 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ChannelService } from '../channels/channel.service';
 import { ChannelEntity } from '../channels/entities/channel.entity';
 import { MessageDto } from '../dtos/messages/create-message.dto';
@@ -11,7 +11,14 @@ import { MessageEntity } from './entities/message.entity';
 
 @Injectable()
 export class MessagesService {
-  constructor(private prisma: PrismaService, @InjectMapper() private readonly mapper: Mapper, private readonly channelService : ChannelService, private readonly eventsGateway: EventsGateway)  {}
+  constructor(
+    private prisma: PrismaService,
+    @InjectMapper() private readonly mapper: Mapper,
+    private readonly channelService : ChannelService
+  )  {}
+
+  @Inject(EventsGateway)
+  private readonly eventsGateway: EventsGateway
 
   async create(messageDto: MessageDto) {
     const message = this.mapper.map(messageDto, MessageDto, MessageCreateEntity);

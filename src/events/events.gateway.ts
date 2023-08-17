@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -11,7 +11,9 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 import { ServerService } from '../servers/server.service';
+import { UserDto } from '../dtos/users/user.dto';
 
+@Injectable()
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -21,11 +23,11 @@ import { ServerService } from '../servers/server.service';
 })
 
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private serverService: ServerService) {}
+  @Inject(forwardRef(() => ServerService))
+  private readonly serverService: ServerService;
   
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('EventsGateway');
-  
   
   @SubscribeMessage('broadcastMessage')
   handleMessage(channelId: string, message: MessageDto): void {
@@ -92,6 +94,16 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
     //! control what happens when another client connects
     console.log("\u001b[1;33m rooms : \u001b[1;0m\n", client.nsp.adapter.rooms); 
-    
+  }
+
+  handleJoinServer(user: UserDto, serverId:string) {
+    this.logger.log('new user on server');
+    this.server.to(`server_${serverId}`).emit('newMember', {user});
+  }
+
+  handleLeaveServer(user: UserDto, serverId:string) {
+    this.logger.log('user has left server');
+    console.log(user);
+    this.server.to(`server_${serverId}`).emit('goneMember', {user});
   }
 }
