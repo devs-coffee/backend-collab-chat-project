@@ -47,7 +47,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('getServerConnectedUsers')
   async handleGetServerUsers(client: Socket, payload: any): Promise<void> {
-    //this.logger.log('getUsers called');
     const connectedUsers = await this.server.in(`server_${payload.serverId}`).fetchSockets();
     let idList: any[] = [];
     if(connectedUsers) {
@@ -69,6 +68,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         this.server.to(server).emit('userLeft', {pseudo: client.data.pseudo, id: client.data.userId});
       }
     }
+    client.nsp.adapter.rooms.delete(`user_${client.data.userId}`);
   }
   
   async handleConnection(client: Socket, ...args: any[]) {
@@ -96,14 +96,17 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     console.log("\u001b[1;33m rooms : \u001b[1;0m\n", client.nsp.adapter.rooms); 
   }
 
-  handleJoinServer(user: UserDto, serverId:string) {
+  async handleJoinServer(user: UserDto, serverId:string) {
     this.logger.log('new user on server');
+    const socket = (await this.server.fetchSockets()).filter(socket => socket.data.userId === user.id)[0];
     this.server.to(`server_${serverId}`).emit('newMember', {user});
+    socket.join(`server_${serverId}`);
   }
 
-  handleLeaveServer(user: UserDto, serverId:string) {
+  async handleLeaveServer(user: UserDto, serverId:string) {
     this.logger.log('user has left server');
-    console.log(user);
+    const socket = (await this.server.fetchSockets()).filter(socket => socket.data.userId === user.id)[0];
     this.server.to(`server_${serverId}`).emit('goneMember', {user});
+    socket.leave(`server_${serverId}`)
   }
 }
