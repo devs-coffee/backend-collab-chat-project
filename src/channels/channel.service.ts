@@ -11,7 +11,8 @@ export class ChannelService {
   constructor(private prisma: PrismaService, @InjectMapper() private readonly mapper: Mapper)  {}
   
   create(channel : CreateChannelEntity) {
-      return this.prisma.channel.create({data : channel});
+    //! create userChannel
+    return this.prisma.channel.create({data : channel});
   }
 
   async findChannelsByServerId(serverId: string) {
@@ -34,6 +35,7 @@ export class ChannelService {
     if(channel){
       const userServer = await this.prisma.userServer.findFirst({where: { serverId : channel.serverId!, userId}});
       if (userServer && userServer.isAdmin){
+        //! les userChannel sont-ils bien remove ?
         await this.prisma.channel.delete({where : { id : channelId }});
         return true;
       }
@@ -43,6 +45,7 @@ export class ChannelService {
   }
 
   async joinOrLeave(channel: UserChannelEntity) {
+    //! Vérifier l'exploitation de cette fonction.
     const hasAlreadyJoined = await this.prisma.userChannel.findFirst({where : {AND : [{channelId: channel.channelId}, {userId: channel.userId}]}});
     if(hasAlreadyJoined !== null) {
       await this.prisma.userChannel.delete({ where : {id: hasAlreadyJoined.id}});

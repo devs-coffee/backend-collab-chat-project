@@ -31,11 +31,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   
   @SubscribeMessage('broadcastMessage')
   handleMessage(channelId: string, message: MessageDto): void {
+    //! cibler l'envoi d'events
     this.server.emit(`message_${channelId}`, message);
   }
 
   @SubscribeMessage('broadcastMessage')
   handleUpdateMessage(messageId: string, message: MessageDto): void {
+    //! cibler l'envoi d'events.
     this.server.emit(`message_${messageId}`, message);
   }
 

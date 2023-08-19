@@ -45,8 +45,12 @@ export class MessagesService {
     const channel = await this.prisma.channel.findUnique({where: {id: channelId}});
     if(channel && channel.serverId){
       await this.prisma.userServer.findFirstOrThrow({where : {AND: [{serverId: channel.serverId}, {userId: message.userId}]}});
+      //! reformater l'erreur pour le front
     }
     const created = await this.prisma.message.create({data : {...message, channelId}});
+    //! modifier les params pour cibler l'envoi d'events.
+    //? param server: serverId || null
+    //? param users: {from: messageDto.userId, to: messageDto.}
     this.eventsGateway.handleMessage(channelId, created);
     return await this.prisma.message.findFirst({where: {id: created.id}, include: { user: true }}) as MessageEntity;
   }
