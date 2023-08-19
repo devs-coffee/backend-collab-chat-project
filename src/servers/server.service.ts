@@ -21,7 +21,23 @@ export class ServerService {
 
   async create(server: ServerDto) {
     const serverEntity = this.mapper.map(server, ServerDto, ServerEntity);
-    const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général', users: {create: {userId: server.userId}}}]}, users: { create : [{userId: server.userId, isAdmin: true}]}}, include: { channels: {select: {id: true, title: true, serverId: true}} } }) as FullServerEntity;
+    //! À corriger et mettre sur plusiers lignes.
+    const created = await this.prisma.server.create(
+      { 
+        data: {
+          ...serverEntity,
+          channels: {
+            //! remove userChannel creation or update channelService.create(), serverService.joinOrLeave, etc.
+            create: [{title: 'Général', users: {create: {userId: server.userId}}}] //create general channel, and userChannel
+          },
+          users: {
+            create : [{userId: server.userId, isAdmin: true}] //create related userServer
+          }
+        }
+        , include: { // include channels in DB response entity to convert into FullServerEntity
+          channels: {select: {id: true, title: true, serverId: true}} 
+        }
+      }) as FullServerEntity;
     created.isCurrentUserAdmin = true;
     created.isCurrentUserMember = true;
     return created;
@@ -97,11 +113,14 @@ export class ServerService {
       if(serverAdmins.length < 2 && serverAdmins[0].userId === userServer.userId) {
         throw new BadRequestException(errorConstant.lastAdminCannotLeave);
       }
+      //! check if userServer is deleted
       await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}});
       
       this.eventsGateway.handleLeaveServer(user!, userServer.serverId);
       return false;
     }
+    //! Create userChannel for every public channel of the server
+    //? return FullServerEntity ?
     const joinedServer = await this.prisma.userServer.create({data: userServer});
     if(joinedServer){
       this.eventsGateway.handleJoinServer(user, userServer.serverId);

@@ -11,7 +11,7 @@ export class ChannelService {
   constructor(private prisma: PrismaService, @InjectMapper() private readonly mapper: Mapper)  {}
   
   create(channel : CreateChannelEntity) {
-    //! create userChannel
+    //! create userChannel for every members of the server ( or only allowed ones )
     return this.prisma.channel.create({data : channel});
   }
 
