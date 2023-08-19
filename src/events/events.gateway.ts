@@ -99,14 +99,18 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async handleJoinServer(user: UserDto, serverId:string) {
     this.logger.log('new user on server');
     const socket = (await this.server.fetchSockets()).filter(socket => socket.data.userId === user.id)[0];
-    this.server.to(`server_${serverId}`).emit('newMember', {user});
-    socket.join(`server_${serverId}`);
+    if(socket) {
+      this.server.to(`server_${serverId}`).emit('newMember', {user});
+      socket.join(`server_${serverId}`);
+    }
   }
 
   async handleLeaveServer(user: UserDto, serverId:string) {
     this.logger.log('user has left server');
     const socket = (await this.server.fetchSockets()).filter(socket => socket.data.userId === user.id)[0];
-    this.server.to(`server_${serverId}`).emit('goneMember', {user});
-    socket.leave(`server_${serverId}`)
+    if(socket) {
+      this.server.to(`server_${serverId}`).emit('goneMember', {user});
+      socket.leave(`server_${serverId}`)
+    }
   }
 }
