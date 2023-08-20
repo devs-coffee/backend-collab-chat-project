@@ -12,5 +12,5 @@ export class UserChannelDto {
     channelId: string;
 
     @AutoMap()
-    user: UserDto
+    user?: UserDto
 }

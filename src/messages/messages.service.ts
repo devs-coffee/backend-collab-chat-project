@@ -51,10 +51,13 @@ export class MessagesService {
     //! modifier les params pour cibler l'envoi d'events.
     //? param server: serverId || null
     //? param users: {from: messageDto.userId, to: messageDto.}
-    this.eventsGateway.handleMessage(channelId, created);
+    //* le from n'est pas forcément utile. on envoie l'event uniquement au destinataire ?
+    const serverId = channel && channel.serverId ? channel.serverId : null;
+    const users = serverId === null ? {from: messageDto.userId, to: messageDto.toUserId!} : null;
+    this.eventsGateway.handleMessage(channelId, created, serverId, users);
     return await this.prisma.message.findFirst({where: {id: created.id}, include: { user: true }}) as MessageEntity;
   }
-
+  
   async getMyMessagesByChannelId(channelId: string, offset?: string){
     let criterias:any = {where : { channelId }, include : { user : {select: {id: true, pseudo: true}}}, take: -10, orderBy: {createdAt: 'asc'}};
     if(offset) {
@@ -67,7 +70,7 @@ export class MessagesService {
 
   async update(messageId: string, messageEntity: MessageCreateEntity) {
     const updated = await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
-    this.eventsGateway.handleUpdateMessage(messageId, updated);
+    this.eventsGateway.handleUpdateMessage(messageId, updated, null, null);
     return updated;
   }
 

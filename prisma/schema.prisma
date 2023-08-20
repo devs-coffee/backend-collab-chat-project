@@ -74,6 +74,7 @@ model UserChannel {
   channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  lastRead  DateTime @default(now())
 }
 
 model Message {

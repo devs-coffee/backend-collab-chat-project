@@ -29,23 +29,34 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('EventsGateway');
   
-  @SubscribeMessage('broadcastMessage')
-  handleMessage(channelId: string, message: MessageDto): void {
+  afterInit(server: Server) {
+    this.logger.log('Events gateway started');
+  }
+  
+  //@SubscribeMessage('broadcastMessage')
+  handleMessage(channelId: string, message: MessageDto, serverId: string | null, users: {from: string, to: string} | null): void {
     //! cibler l'envoi d'events
-    this.server.emit(`message_${channelId}`, message);
+    if(serverId) {
+      this.server.to(`server_${serverId}`).emit(`message_${channelId}`, message);
+    }
+    else {
+      console.log("\u001b[1;33mPrivate Message :\n\u001b[1;0m", {...users, on_channel: channelId});
+      this.server.to(`user_${users!.to}`).emit(`privateMessage`, {message, channelId});
+    }
+    //this.server.emit(`message_${channelId}`, message);
   }
 
-  @SubscribeMessage('broadcastMessage')
-  handleUpdateMessage(messageId: string, message: MessageDto): void {
+  //@SubscribeMessage('broadcastUpdateMessage')
+  handleUpdateMessage(messageId: string, message: MessageDto, serverId: string | null, users: {from: string, to: string} | null): void {
     //! cibler l'envoi d'events.
     this.server.emit(`message_${messageId}`, message);
   }
 
-  @SubscribeMessage('private_room')
-  handleRooms(client: Socket, payload: string): void {
-    this.server.socketsJoin('private_room');
-    this.server.emit("joined_private_room", {message : "joined provate room"})
-  }
+  // @SubscribeMessage('private_room')
+  // handleRooms(client: Socket, payload: string): void {
+  //   this.server.socketsJoin('private_room');
+  //   this.server.emit("joined_private_room", {message : "joined provate room"})
+  // }
 
   @SubscribeMessage('getServerConnectedUsers')
   async handleGetServerUsers(client: Socket, payload: any): Promise<void> {
@@ -58,10 +69,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       }
     }
     this.server.to(client.id).emit('serverUserList', {userList: idList});
-  }
-  
-  afterInit(server: Server) {
-    this.logger.log('Events gateway started');
   }
   
   handleDisconnect(client: Socket) {
@@ -82,7 +89,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     client.data.pseudo = decodedToken?.["pseudo"];
     client.data.userId = decodedToken?.["userId"];
     client.join(`user_${decodedToken?.["userId"]}`);
-    ////console.log(client.nsp.adapter.rooms.get(`user_${decodedToken["userId"]}`));
+    //console.log(client.nsp.adapter.rooms.get(`user_${decodedToken["userId"]}`));
     //* get all the servers the user is a member of
     //* then join the client to their room ( rooms will be created if not already existing )
     let serverRooms = await this.serverService.findAll(decodedToken?.["userId"]);
@@ -105,7 +112,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   handleLeaveServer(user: UserDto, serverId:string) {
     this.logger.log('user has left server');
-    console.log(user);
     this.server.to(`server_${serverId}`).emit('goneMember', {user});
   }
 }

@@ -1,6 +1,7 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
+import { UserChannelDto } from 'src/dtos/userChannels/user-channel-dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
@@ -10,9 +11,21 @@ import { UserChannelEntity } from './entities/userChannel.entity';
 export class ChannelService {
   constructor(private prisma: PrismaService, @InjectMapper() private readonly mapper: Mapper)  {}
   
-  create(channel : CreateChannelEntity) {
+  async create(channel : CreateChannelEntity) {
     //! create userChannel for every members of the server ( or only allowed ones )
-    return this.prisma.channel.create({data : channel});
+    const createdChannel = await this.prisma.channel.create({data : channel});
+    const serverUsers = await this.prisma.userServer.findMany({where: {serverId: channel.serverId}});
+    console.log("users :", serverUsers);
+    let data: UserChannelDto[] = [];
+    for(let item of serverUsers) {
+      data.push({
+        userId: item.userId,
+        channelId: createdChannel.id
+      })
+    }
+    //! create userChannel
+    await this.prisma.userChannel.createMany({data});
+    return createdChannel;
   }
 
   async findChannelsByServerId(serverId: string) {
