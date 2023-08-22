@@ -73,13 +73,15 @@ export class ChannelController {
   @Get("@me")
   @ApiCreatedResponse({ type: ChannelDto, isArray : true })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async getUserChannels(@Request() req) : Promise<OperationResult<ChannelDto[]>> {
-    const result = new OperationResult<ChannelDto[]>();
+  async getUserPrivateChannels(@Request() req) : Promise<OperationResult<ChannelDto[]>> {
+    const result = new OperationResult<any[]>();
     result.isSucceed = false;
     try {
-      const channels = await this.channelService.findChannelsByUserId(req.user.id);
+      const channels = await this.channelService.findPrivateChannelsByUserId(req.user.id);
       result.isSucceed = true;
-      result.result = this.mapper.mapArray(channels, ChannelEntity, ChannelDto);
+      //result.result = [];
+      //result.result = this.mapper.mapArray(channels, ChannelEntity, ChannelDto);
+      result.result = channels;
       return result;
     } catch (error) {
         Logger.log(error);
@@ -112,7 +114,7 @@ export class ChannelController {
   @UseGuards(JwtAuthGuard)
   @Put(":channelId")
   @ApiCreatedResponse({ type: UpdateChannelDto })
-  @ApiBadRequestResponse({ type : BadRequestException})
+  @ApiBadRequestResponse({ type : BadRequestException })
   async update(@Param('channelId') channelId: string, @Body() updateChannelDto: UpdateChannelDto, @Request() req) {
     const result = new OperationResult<UpdateChannelDto | null>();
     result.isSucceed = false;
@@ -130,6 +132,24 @@ export class ChannelController {
     } catch (error) {
         Logger.log(error);
         throw new BadRequestException(errorConstant.errorOccured);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put(":channelId/isRead")
+  @ApiOkResponse({type: Boolean})
+  @ApiBadRequestResponse({ type: BadRequestException })
+  async putAsRead(@Param('channelId') channelId: string, @Request() req) {
+    console.log('putAsRead triggered');
+    const response = new OperationResult<boolean>();
+    response.isSucceed = false;
+    try {
+      response.isSucceed = true;
+      response.result = await this.channelService.putAsRead(channelId, req.user.id);
+      return response;
+    } catch (error) {
+      Logger.log(error);
+      throw new BadRequestException(errorConstant.errorOccured);
     }
   }
 

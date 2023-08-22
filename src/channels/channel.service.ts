@@ -14,17 +14,19 @@ export class ChannelService {
   async create(channel : CreateChannelEntity) {
     //! create userChannel for every members of the server ( or only allowed ones )
     const createdChannel = await this.prisma.channel.create({data : channel});
-    const serverUsers = await this.prisma.userServer.findMany({where: {serverId: channel.serverId}});
-    console.log("users :", serverUsers);
-    let data: UserChannelDto[] = [];
-    for(let item of serverUsers) {
-      data.push({
-        userId: item.userId,
-        channelId: createdChannel.id
-      })
+    if(channel.serverId) {
+      const serverUsers = await this.prisma.userServer.findMany({where: {serverId: channel.serverId}});
+      console.log("users :", serverUsers);
+      let data: UserChannelDto[] = [];
+      for(let item of serverUsers) {
+        data.push({
+          userId: item.userId,
+          channelId: createdChannel.id
+        })
+      }
+      //! create userChannel
+      await this.prisma.userChannel.createMany({data});
     }
-    //! create userChannel
-    await this.prisma.userChannel.createMany({data});
     return createdChannel;
   }
 
@@ -39,8 +41,20 @@ export class ChannelService {
     return usersChannel as ChannelEntity[];
   }
 
+  async findPrivateChannelsByUserId(userId: string) {
+    const chans = await this.prisma.channel.findMany({where: {AND: [{serverId: null}, {users: {some: {userId}}}]}, include: {users: {select: {user: true}, where: {user: {isNot: {id: userId}}}}}});
+    console.log("My private chans :", chans)
+    return chans;
+  }
+
   async update(channelId: string, channelEntity: CreateChannelEntity) {
     return await this.prisma.channel.update({where: { id: channelId}, data: channelEntity});
+  }
+  async putAsRead(channelId: string, userId: string) {
+    //! not implemented
+    //TODO update lastRead field
+    
+    return false;
   }
 
   async remove(channelId: string, userId: string) {

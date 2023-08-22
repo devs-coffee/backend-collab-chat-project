@@ -118,11 +118,9 @@ export class ServerService {
       }
       await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}});
       // delete userchannels
-      const serverChannels = await this.prisma.channel.findMany({where: {serverId: hasAlreadyJoined.serverId}});
-      //TODO : possibilité de ne faire qu'une seule requête prisma ?
-      for(let channel of serverChannels) {
-        await this.prisma.userChannel.deleteMany({where: {AND : [{userId: userServer.userId}, {channelId: channel.id}]}});
-      }
+      const serverChannels = (await this.prisma.channel.findMany({where: {serverId: hasAlreadyJoined.serverId}, select: {id: true}})).map(elt => elt.id) ;
+      await this.prisma.userChannel.deleteMany({where: {AND : [{userId: userServer.userId}, {channelId: {in : serverChannels}}]}});
+
       this.eventsGateway.handleLeaveServer(user!, userServer.serverId);
       return false;
     }
