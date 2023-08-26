@@ -81,8 +81,6 @@ export class ChannelController {
     try {
       const channels = await this.channelService.findPrivateChannelsByUserId(req.user.id);
       result.isSucceed = true;
-      //result.result = [];
-      //result.result = this.mapper.mapArray(channels, ChannelEntity, ChannelDto);
       result.result = channels;
       return result;
     } catch (error) {

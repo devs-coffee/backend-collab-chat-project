@@ -2,7 +2,6 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Inject, Injectable } from '@nestjs/common';
 import { ChannelService } from '../channels/channel.service';
-import { ChannelEntity } from '../channels/entities/channel.entity';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { MessageCreateEntity } from './entities/message.create.entity';
