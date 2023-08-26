@@ -14,7 +14,7 @@ export class ChannelEntity implements Channel {
 
     @AutoMap()
     @ApiProperty()
-    serverId: string;
+    serverId: string | null;
 
     @ApiProperty()
     createdAt: Date;
@@ -23,5 +23,7 @@ export class ChannelEntity implements Channel {
     updatedAt: Date;
 
     @AutoMap()
-    users?: UserPrivateChannelEntity[]
+    users: UserPrivateChannelEntity[];
+
+    hasNews?: boolean;
 }

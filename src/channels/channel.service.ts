@@ -1,17 +1,32 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
+import { UserChannelDto } from 'src/dtos/userChannels/user-channel-dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
 import { UserChannelEntity } from './entities/userChannel.entity';
+import { UserPrivateChannelEntity } from './entities/userPrivateChannel.entity';
 
 @Injectable()
 export class ChannelService {
   constructor(private prisma: PrismaService, @InjectMapper() private readonly mapper: Mapper)  {}
   
-  create(channel : CreateChannelEntity) {
-      return this.prisma.channel.create({data : channel});
+  async create(channel : CreateChannelEntity) {
+    //* create userChannel for every members of the server ( or only allowed ones )
+    const createdChannel = await this.prisma.channel.create({data : channel});
+    if(channel.serverId) {
+      const serverUsers = await this.prisma.userServer.findMany({where: {serverId: channel.serverId}});
+      let data: UserChannelDto[] = [];
+      for(let item of serverUsers) {
+        data.push({
+          userId: item.userId,
+          channelId: createdChannel.id
+        })
+      }
+      //* create userChannel
+      await this.prisma.userChannel.createMany({data});
+    }
+    return createdChannel;
   }
 
   async findChannelsByServerId(serverId: string) {
@@ -19,14 +34,23 @@ export class ChannelService {
     return channels;
   }
 
-  async findChannelsByUserId(userId: string) {
-    const userChannels = await this.prisma.user.findFirst({where : {id : userId}, include : { channels : { select : { channelId : true}}}});
-    const usersChannel = await this.prisma.channel.findMany({where : { id : { in : userChannels && userChannels.channels.length > 0 && userChannels.channels.map(c => c.channelId) || []}}, include : { users : { include : {user : true}}}});
-    return usersChannel as ChannelEntity[];
+  async findPrivateChannelsByUserId(userId: string) {
+    const chans: UserPrivateChannelEntity[] = await this.prisma.channel.findMany({where: {AND: [{serverId: null}, {users: {some: {userId}}}]}, include: {users: {select: {user: {select: {id: true, pseudo: true, picture: true}}, lastRead: true}, where: {user: {isNot: {id: userId}}}}}});
+    for(let chan of chans) {
+      const unread = await this.prisma.message.findFirst({where: {AND: [{channelId: chan.id}, {createdAt: {gte: chan.users[0].lastRead}}]}});
+      chan.hasNew = unread ? true : false;
+    }
+    return chans;
   }
 
   async update(channelId: string, channelEntity: CreateChannelEntity) {
     return await this.prisma.channel.update({where: { id: channelId}, data: channelEntity});
+  }
+  async putAsRead(channelId: string, userId: string) {
+    //! not implemented
+    //TODO update lastRead field
+    
+    return false;
   }
 
   async remove(channelId: string, userId: string) {
@@ -43,6 +67,7 @@ export class ChannelService {
   }
 
   async joinOrLeave(channel: UserChannelEntity) {
+    //TODO Vérifier l'exploitation de cette fonction.
     const hasAlreadyJoined = await this.prisma.userChannel.findFirst({where : {AND : [{channelId: channel.channelId}, {userId: channel.userId}]}});
     if(hasAlreadyJoined !== null) {
       await this.prisma.userChannel.delete({ where : {id: hasAlreadyJoined.id}});

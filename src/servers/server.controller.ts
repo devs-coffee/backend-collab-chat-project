@@ -123,7 +123,7 @@ export class ServerController {
   }
 
   /**
-   * Request to join or leave a server
+   ** Request to join or leave a server
    * @param joinRequest id of server to join or leave
    * @returns true if server is joined, false if left
    */
@@ -131,7 +131,7 @@ export class ServerController {
   @Post("join")
   @ApiCreatedResponse({ type: Boolean })
   @ApiBadRequestResponse({ type : BadRequestException })
-  async joinOrLeave(@Body() joinRequest: JoinServerRequestDto, @Request() req) : Promise<OperationResult<boolean>> {
+  async joinOrLeave(@Body() joinRequest: JoinServerRequestDto, @Request() req) : Promise<OperationResult<boolean>>/* return the FullServerDto ?*/ {
     const result = new OperationResult<boolean>();
     result.isSucceed = false;
     const dto = {
@@ -154,7 +154,7 @@ export class ServerController {
   }
 
   /**
-   * Get a server by id
+   ** Get a server by id
    * @param id id of server
    * @returns the server
    */
@@ -177,7 +177,7 @@ export class ServerController {
   }
 
   /**
-   * Update a server
+   ** Update a server
    * @param id id of server
    * @param updateServerDto data tu update server
    * @returns the new server's data
@@ -206,7 +206,7 @@ export class ServerController {
   }
 
   /**
-   * Delete a server by id
+   ** Delete a server by id
    * @param id id of server
    * @returns true if server is deleted, false otherwhise
    */

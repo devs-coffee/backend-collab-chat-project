@@ -1,5 +1,8 @@
 .env
 package-lock.json
+/prisma/seeds
+/desktop.ini
+/test_queries
 
 # compiled output
 /dist
