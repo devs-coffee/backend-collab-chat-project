@@ -8,15 +8,11 @@ import { OperationResult } from '../core/OperationResult';
 import { ChannelDto } from '../dtos/channels/channel.dto';
 import { ChannelServerDto } from '../dtos/channels/channel.server.dto';
 import { UpdateChannelDto } from '../dtos/channels/update.channel.dto';
-import { ServerChannelEntity } from '../servers/entities/server.channels.entity';
-import { ServerEntity } from '../servers/entities/server.entity';
-import { ChannelService } from './channel.service';
-import { ChannelEntity } from './entities/channel.entity';
-import { CreateChannelEntity } from './entities/create.channel.entity';
 import { UserChannelDto } from '../dtos/userChannels/user-channel-dto';
+import { ServerChannelEntity } from '../servers/entities/server.channels.entity';
+import { ChannelService } from './channel.service';
+import { CreateChannelEntity } from './entities/create.channel.entity';
 import { UserChannelEntity } from './entities/userChannel.entity';
-import { UserPrivateChannelEntity } from './entities/userPrivateChannel.entity';
-import { UserPrivateChannelDto } from 'src/dtos/channels/userPrivateChannel.dto';
 
 @Controller('channels')
 @ApiTags('channels')
@@ -140,7 +136,6 @@ export class ChannelController {
   @ApiOkResponse({type: Boolean})
   @ApiBadRequestResponse({ type: BadRequestException })
   async putAsRead(@Param('channelId') channelId: string, @Request() req) {
-    console.log('putAsRead triggered');
     const response = new OperationResult<boolean>();
     response.isSucceed = false;
     try {

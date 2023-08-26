@@ -28,7 +28,6 @@ export class MessagesService {
       // check in there already is a private channel between these users
       const existingChannel = await this.prisma.channel.findFirst({where : {AND: [{serverId: null}, {users: {some: {userId: messageDto.userId}}}, {users: {some: {userId: messageDto.toUserId}}}]}});
       if(existingChannel) {
-        //channel already exists, set channelId
         channelId = existingChannel.id;
       }
       else {

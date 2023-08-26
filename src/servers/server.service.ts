@@ -22,13 +22,11 @@ export class ServerService {
 
   async create(server: ServerDto) {
     const serverEntity = this.mapper.map(server, ServerDto, ServerEntity);
-    //! À corriger et mettre sur plusiers lignes.
     const created = await this.prisma.server.create(
       { 
         data: {
           ...serverEntity,
           channels: {
-            //! remove userChannel creation or update channelService.create(), serverService.joinOrLeave, etc.
             create: [{title: 'Général', users: {create: {userId: server.userId}}}] //create general channel, and userChannel
           },
           users: {
