@@ -15,6 +15,8 @@ import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
 import { UserChannelDto } from '../dtos/userChannels/user-channel-dto';
 import { UserChannelEntity } from './entities/userChannel.entity';
+import { UserPrivateChannelEntity } from './entities/userPrivateChannel.entity';
+import { UserPrivateChannelDto } from 'src/dtos/channels/userPrivateChannel.dto';
 
 @Controller('channels')
 @ApiTags('channels')

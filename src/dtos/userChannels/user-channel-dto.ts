@@ -13,4 +13,7 @@ export class UserChannelDto {
 
     @AutoMap()
     user?: UserDto
+
+    @AutoMap()
+    lastRead?: Date
 }

@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
 import { UserChannelEntity } from './entities/userChannel.entity';
+import { UserPrivateChannelEntity } from './entities/userPrivateChannel.entity';
 
 @Injectable()
 export class ChannelService {
@@ -35,14 +36,23 @@ export class ChannelService {
     return channels;
   }
 
-  async findChannelsByUserId(userId: string) {
-    const userChannels = await this.prisma.user.findFirst({where : {id : userId}, include : { channels : { select : { channelId : true}}}});
-    const usersChannel = await this.prisma.channel.findMany({where : { id : { in : userChannels && userChannels.channels.length > 0 && userChannels.channels.map(c => c.channelId) || []}}, include : { users : { include : {user : true}}}});
-    return usersChannel as ChannelEntity[];
-  }
+  // async findChannelsByUserId(userId: string) {
+  //   const userChannels = await this.prisma.user.findFirst({where : {id : userId}, include : { channels : { select : { channelId : true}}}});
+  //   const usersChannel = await this.prisma.channel.findMany({where : { id : { in : userChannels && userChannels.channels.length > 0 && userChannels.channels.map(c => c.channelId) || []}}, include : { users : { include : {user : true}}}});
+  //   return usersChannel as ChannelEntity[];
+  // }
 
   async findPrivateChannelsByUserId(userId: string) {
-    const chans = await this.prisma.channel.findMany({where: {AND: [{serverId: null}, {users: {some: {userId}}}]}, include: {users: {select: {user: true}, where: {user: {isNot: {id: userId}}}}}});
+    const chans: UserPrivateChannelEntity[] = await this.prisma.channel.findMany({where: {AND: [{serverId: null}, {users: {some: {userId}}}]}, include: {users: {select: {user: {select: {id: true, pseudo: true, picture: true}}, lastRead: true}, where: {user: {isNot: {id: userId}}}}}});
+    
+    // const datedChans = chans.map(chan => {
+    //   return {...chan, hasNew: true}
+    // });
+    for(let chan of chans) {
+      const unread = await this.prisma.message.findFirst({where: {AND: [{channelId: chan.id}, {createdAt: {gte: chan.users[0].lastRead}}]}});
+      chan.hasNew = unread ? true : false;
+    }
+    
     console.log("My private chans :", chans)
     return chans;
   }

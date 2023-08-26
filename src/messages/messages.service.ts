@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MessageCreateEntity } from './entities/message.create.entity';
 import { EventsGateway } from '../events/events.gateway';
 import { MessageEntity } from './entities/message.entity';
+import { CreateChannelEntity } from 'src/channels/entities/create.channel.entity';
 
 @Injectable()
 export class MessagesService {
@@ -23,34 +24,35 @@ export class MessagesService {
   async create(messageDto: MessageDto) {
     const message = this.mapper.map(messageDto, MessageDto, MessageCreateEntity);
     let channelId = message.channelId;
+    // if no channel then it is a private message
     if(!channelId) {
-      // if no channel then it is a new message (one to one) so we need to create channel first
-      const channel = new ChannelEntity();
-      channel.title = "";
-      const createdChannel = await this.channelService.create(channel);
-      channelId = createdChannel.id;
-      await this.prisma.userChannel.createMany({data : 
-        [
-          {
-            userId : message.userId,
-            channelId : channelId
-          },
-          {
-            userId : messageDto.toUserId!,
-            channelId: channelId
-          }
-        ]
-      })
+      // check in there already is a private channel between these users
+      const existingChannel = await this.prisma.channel.findFirst({where : {AND: [{serverId: null}, {users: {some: {userId: messageDto.userId}}}, {users: {some: {userId: messageDto.toUserId}}}]}});
+      if(existingChannel) {
+        //channel already exists, set channelId
+        channelId = existingChannel.id;
+      }
+      else {
+        // First private message between these users. Create channel first
+        const channel = new CreateChannelEntity();
+        channel.title = "";
+        const createdChannel = await this.channelService.create(channel);
+        channelId = createdChannel.id;
+        await this.prisma.userChannel.createMany({data : 
+          [
+            { userId : message.userId, channelId : channelId },
+            { userId : messageDto.toUserId!, channelId: channelId }
+          ]
+        })
+      }
+
     }
     const channel = await this.prisma.channel.findUnique({where: {id: channelId}});
     if(channel && channel.serverId){
       await this.prisma.userServer.findFirstOrThrow({where : {AND: [{serverId: channel.serverId}, {userId: message.userId}]}});
-      //! reformater l'erreur pour le front
+      //TODO reformater l'erreur pour le front
     }
     const created = await this.prisma.message.create({data : {...message, channelId}});
-    //! modifier les params pour cibler l'envoi d'events.
-    //? param server: serverId || null
-    //? param users: {from: messageDto.userId, to: messageDto.}
     //* le from n'est pas forcément utile. on envoie l'event uniquement au destinataire ?
     const serverId = channel && channel.serverId ? channel.serverId : null;
     const users = serverId === null ? {from: messageDto.userId, to: messageDto.toUserId!} : null;

@@ -26,6 +26,7 @@ import { UserServerDto } from '../dtos/userServers/user-servers-dto';
 import { UserServerEntity } from '../servers/entities/user-server-entity';
 import { FullServerDto } from '../dtos/servers/fullServer.dto';
 import { FullServerEntity } from '../servers/entities/fullServer.entity';
+import { UserPrivateChannelDto } from 'src/dtos/channels/userPrivateChannel.dto';
 
 @Injectable()
 export class AutoMapping extends AutomapperProfile {
@@ -67,14 +68,14 @@ export class AutoMapping extends AutomapperProfile {
             // channels
             createMap(mapper, ChannelEntity, ChannelDto, forMember(
                 (destination) => destination.users,
-                mapWith(UserChannelDto, UserPrivateChannelEntity, (source) => source.users))
+                mapWith(UserPrivateChannelDto, UserPrivateChannelEntity, (source) => source.users))
             );
 
             createMap(mapper, UserChannelDto, UserChannelEntity);
 
-            createMap(mapper, UserPrivateChannelEntity, UserChannelDto, forMember(
+            createMap(mapper, UserPrivateChannelEntity, UserPrivateChannelDto, forMember(
                 (destination) => destination.user,
-                mapWith(UserDto, UserEntity, (source) => source.user))
+                mapWith(UserDto, UserEntity, (source) => source.users))
             );
             createMap(mapper, ChannelDto, CreateChannelEntity);
             createMap(mapper, CreateChannelEntity, ChannelDto);
