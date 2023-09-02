@@ -23,11 +23,8 @@ export class UsersService {
     if(idList) {
       idArray = idList.split(',');
     }
-    console.log(idArray);
     if(idArray.length > 0) {
-      console.log("in criterias");
       const response = await this.prisma.user.findMany({ where: {id: {in: idArray}}});
-      console.log(response);
       return response;
     }
     return this.prisma.user.findMany();

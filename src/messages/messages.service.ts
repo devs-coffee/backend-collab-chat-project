@@ -70,20 +70,17 @@ export class MessagesService {
 
   async update(messageId: string, messageEntity: MessageCreateEntity) {
     const updated = await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
-    const server = await this.prisma.server.findFirst({where : {channels: {some: {id: messageEntity.channelId}}}});
+    const server = await this.prisma.server.findFirst({where : {channels: {some: {id: updated.channelId}}}});
     let serverId: string | null = null;
+    let toUser: string | null = null;
     if(server) {
       serverId = server.id;
     }
     else { 
-      console.log('not found');
       const privateChan = await this.prisma.channel.findFirst({where : {id: messageEntity.channelId}, include: {users: true}});
-      const toUser = privateChan?.users.find(user => user.userId !== messageEntity.userId);
-      console.log("to user :", toUser);
-
+      toUser = privateChan?.users.find(userChan => userChan.userId !== updated.userId)?.userId!;
     };
-    
-    this.eventsGateway.handleUpdateMessage(messageId, updated, serverId, null);
+    this.eventsGateway.handleUpdateMessage(updated, serverId, toUser);
     return updated;
   }
 
@@ -91,6 +88,8 @@ export class MessagesService {
     const message = await this.prisma.message.findFirst({where: { id: messageId, userId : userId}});
     if(message){
       await this.prisma.message.delete({where : { id : messageId}});
+      //TODO : handle events.
+
       return true;
     }
     return false;

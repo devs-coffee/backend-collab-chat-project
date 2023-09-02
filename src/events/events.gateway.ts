@@ -39,15 +39,14 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.server.to(`server_${serverId}`).emit(`message_${channelId}`, message);
     }
     else {
-      //console.log("\u001b[1;33mPrivate Message :\n\u001b[1;0m", {toUser, on_channel: channelId});
-      this.server.to(`user_${toUser}`).emit(`privateMessage`, {message});
+      this.server.to(`user_${toUser}`).emit(`privateMessage`, message);
     }
   }
 
   //@SubscribeMessage('broadcastUpdateMessage')
-  handleUpdateMessage(messageId: string, message: MessageDto, serverId: string | null, toUser: string | null): void {
+  handleUpdateMessage(message: MessageDto, serverId: string | null, toUser: string | null): void {
     //! cibler l'envoi d'events.
-    if(serverId) {
+    if(serverId !== null) {
       this.server.to(`server_${serverId}`).emit(`message_${message.channelId}`, message);
     }
     else {
@@ -98,7 +97,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       }    
     }
     //! control what happens when another client connects
-    console.log("\u001b[1;33m rooms : \u001b[1;0m\n", client.nsp.adapter.rooms); 
+    //console.log("\u001b[1;33m rooms : \u001b[1;0m\n", client.nsp.adapter.rooms); 
   }
 
   async handleJoinServer(user: UserDto, serverId:string) {
