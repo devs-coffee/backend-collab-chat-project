@@ -53,8 +53,8 @@ export class MessagesService {
     const created = await this.prisma.message.create({data : {...message, channelId}});
     //* le from n'est pas forcément utile. on envoie l'event uniquement au destinataire ?
     const serverId = channel && channel.serverId ? channel.serverId : null;
-    const users = serverId === null ? {from: messageDto.userId, to: messageDto.toUserId!} : null;
-    this.eventsGateway.handleMessage(channelId, created, serverId, users);
+    const toUser = serverId === null ? messageDto.toUserId! : null;
+    this.eventsGateway.handleMessage(channelId, created, serverId, toUser);
     return await this.prisma.message.findFirst({where: {id: created.id}, include: { user: true }}) as MessageEntity;
   }
   
@@ -70,7 +70,20 @@ export class MessagesService {
 
   async update(messageId: string, messageEntity: MessageCreateEntity) {
     const updated = await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
-    this.eventsGateway.handleUpdateMessage(messageId, updated, null, null);
+    const server = await this.prisma.server.findFirst({where : {channels: {some: {id: messageEntity.channelId}}}});
+    let serverId: string | null = null;
+    if(server) {
+      serverId = server.id;
+    }
+    else { 
+      console.log('not found');
+      const privateChan = await this.prisma.channel.findFirst({where : {id: messageEntity.channelId}, include: {users: true}});
+      const toUser = privateChan?.users.find(user => user.userId !== messageEntity.userId);
+      console.log("to user :", toUser);
+
+    };
+    
+    this.eventsGateway.handleUpdateMessage(messageId, updated, serverId, null);
     return updated;
   }
 

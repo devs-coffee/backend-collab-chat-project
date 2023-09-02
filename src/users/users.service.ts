@@ -18,13 +18,17 @@ export class UsersService {
     return this.prisma.user.create({ data: user});
   }
 
-  findAll(idList?: string) {
+  async findAll(idList?: string) {
     let idArray: string[] = [];
-      if(idList) {
-        idArray = idList.split(',');
-      }
+    if(idList) {
+      idArray = idList.split(',');
+    }
+    console.log(idArray);
     if(idArray.length > 0) {
-      return this.prisma.user.findMany({ where: {id: {in: idArray}}});
+      console.log("in criterias");
+      const response = await this.prisma.user.findMany({ where: {id: {in: idArray}}});
+      console.log(response);
+      return response;
     }
     return this.prisma.user.findMany();
   }

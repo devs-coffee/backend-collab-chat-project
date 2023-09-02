@@ -34,20 +34,25 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
   
   //@SubscribeMessage('broadcastMessage')
-  handleMessage(channelId: string, message: MessageDto, serverId: string | null, users: {from: string, to: string} | null): void {
+  handleMessage(channelId: string, message: MessageDto, serverId: string | null, toUser: string | null): void {
     if(serverId) {
       this.server.to(`server_${serverId}`).emit(`message_${channelId}`, message);
     }
     else {
-      //console.log("\u001b[1;33mPrivate Message :\n\u001b[1;0m", {...users, on_channel: channelId});
-      this.server.to(`user_${users!.to}`).emit(`privateMessage`, {message, channelId});
+      //console.log("\u001b[1;33mPrivate Message :\n\u001b[1;0m", {toUser, on_channel: channelId});
+      this.server.to(`user_${toUser}`).emit(`privateMessage`, {message});
     }
   }
 
   //@SubscribeMessage('broadcastUpdateMessage')
-  handleUpdateMessage(messageId: string, message: MessageDto, serverId: string | null, users: {from: string, to: string} | null): void {
+  handleUpdateMessage(messageId: string, message: MessageDto, serverId: string | null, toUser: string | null): void {
     //! cibler l'envoi d'events.
-    this.server.emit(`message_${messageId}`, message);
+    if(serverId) {
+      this.server.to(`server_${serverId}`).emit(`message_${message.channelId}`, message);
+    }
+    else {
+      this.server.to(`user_${toUser}`).emit(`privateMessage`, message);
+    }
   }
 
   @SubscribeMessage('getServerConnectedUsers')

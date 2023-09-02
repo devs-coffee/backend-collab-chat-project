@@ -32,6 +32,7 @@ export class AuthenticationController {
       return result;
     } catch (error) {
         Logger.log(error);
+        if(error instanceof BadRequestException) { throw error };
         throw new BadRequestException(errorConstant.errorOccured);
     }
   }
