@@ -33,7 +33,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     this.logger.log('Events gateway started');
   }
   
-  //@SubscribeMessage('broadcastMessage')
   handleMessage(channelId: string, message: MessageDto, serverId: string | null, toUser: string | null): void {
     if(serverId) {
       this.server.to(`server_${serverId}`).emit(`message_${channelId}`, message);
@@ -43,14 +42,21 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
-  //@SubscribeMessage('broadcastUpdateMessage')
   handleUpdateMessage(message: MessageDto, serverId: string | null, toUser: string | null): void {
-    //! cibler l'envoi d'events.
     if(serverId !== null) {
       this.server.to(`server_${serverId}`).emit(`message_${message.channelId}`, message);
     }
     else {
       this.server.to(`user_${toUser}`).emit(`privateMessage`, message);
+    }
+  }
+
+  handleDeleteMessage(messageId: MessageDto, serverId: string |null, toUser: string | null): void {
+    if(serverId !== null) {
+      this.server.to(`server_${serverId}`).emit(`deleteMessage`, messageId);
+    }
+    else {
+      this.server.to(`user_${toUser}`).emit(`deleteMessage`, messageId);
     }
   }
 

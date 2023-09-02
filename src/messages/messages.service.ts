@@ -43,7 +43,6 @@ export class MessagesService {
           ]
         })
       }
-
     }
     const channel = await this.prisma.channel.findUnique({where: {id: channelId}});
     if(channel && channel.serverId){
@@ -51,7 +50,6 @@ export class MessagesService {
       //TODO reformater l'erreur pour le front
     }
     const created = await this.prisma.message.create({data : {...message, channelId}});
-    //* le from n'est pas forcément utile. on envoie l'event uniquement au destinataire ?
     const serverId = channel && channel.serverId ? channel.serverId : null;
     const toUser = serverId === null ? messageDto.toUserId! : null;
     this.eventsGateway.handleMessage(channelId, created, serverId, toUser);
@@ -87,9 +85,18 @@ export class MessagesService {
   async remove(messageId: string, userId: string) {
     const message = await this.prisma.message.findFirst({where: { id: messageId, userId : userId}});
     if(message){
+      const channel = await this.prisma.channel.findFirst({where: {id: message.channelId}, include: {users: true}});
+      let serverId: string | null = null;
+      let toUser: string | null = null;
+      if(channel?.serverId !== null) {
+        serverId = channel?.serverId!;
+      }
+      else {
+        let idList = channel.users.map(elt => elt.userId);
+        toUser = idList.find(elt => elt !== message.userId)!;
+      }
+      this.eventsGateway.handleDeleteMessage(message, serverId, toUser);
       await this.prisma.message.delete({where : { id : messageId}});
-      //TODO : handle events.
-
       return true;
     }
     return false;
