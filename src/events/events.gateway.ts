@@ -37,7 +37,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if(serverId) {
       this.server.to(`server_${serverId}`).emit(`message_${channelId}`, message);
     }
-    else {
+    if(toUser) {
       this.server.to(`user_${toUser}`).emit(`privateMessage`, message);
     }
   }
@@ -46,7 +46,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if(serverId !== null) {
       this.server.to(`server_${serverId}`).emit(`message_${message.channelId}`, message);
     }
-    else {
+    if(toUser) {
       this.server.to(`user_${toUser}`).emit(`privateMessage`, message);
     }
   }

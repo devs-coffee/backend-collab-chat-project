@@ -1,6 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ChannelService } from '../channels/channel.service';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -8,6 +8,7 @@ import { MessageCreateEntity } from './entities/message.create.entity';
 import { EventsGateway } from '../events/events.gateway';
 import { MessageEntity } from './entities/message.entity';
 import { CreateChannelEntity } from 'src/channels/entities/create.channel.entity';
+import { errorConstant } from 'src/constants/errors.constants';
 
 @Injectable()
 export class MessagesService {
@@ -49,9 +50,12 @@ export class MessagesService {
       await this.prisma.userServer.findFirstOrThrow({where : {AND: [{serverId: channel.serverId}, {userId: message.userId}]}});
       //TODO reformater l'erreur pour le front
     }
-    const created = await this.prisma.message.create({data : {...message, channelId}});
     const serverId = channel && channel.serverId ? channel.serverId : null;
     const toUser = serverId === null ? messageDto.toUserId! : null;
+    if(serverId === null && toUser === null ) {
+      throw new BadRequestException(errorConstant.errorOccured);
+    }
+    const created = await this.prisma.message.create({data : {...message, channelId}});
     this.eventsGateway.handleMessage(channelId, created, serverId, toUser);
     return await this.prisma.message.findFirst({where: {id: created.id}, include: { user: true }}) as MessageEntity;
   }
@@ -67,8 +71,11 @@ export class MessagesService {
   }
 
   async update(messageId: string, messageEntity: MessageCreateEntity) {
-    const updated = await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
-    const server = await this.prisma.server.findFirst({where : {channels: {some: {id: updated.channelId}}}});
+    const messageToUpdate = await this.prisma.message.findFirst({where: { id: messageId}});
+    if(!messageToUpdate) {
+      throw new BadRequestException(errorConstant.itemNotExisting);
+    }
+    const server = await this.prisma.server.findFirst({where : {channels: {some: {id: messageToUpdate.channelId}}}});
     let serverId: string | null = null;
     let toUser: string | null = null;
     if(server) {
@@ -78,6 +85,10 @@ export class MessagesService {
       const privateChan = await this.prisma.channel.findFirst({where : {id: messageEntity.channelId}, include: {users: true}});
       toUser = privateChan?.users.find(userChan => userChan.userId !== updated.userId)?.userId!;
     };
+    if(serverId === null && toUser === null) {
+      throw new BadRequestException(errorConstant.errorOccured);
+    }
+    const updated = await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
     this.eventsGateway.handleUpdateMessage(updated, serverId, toUser);
     return updated;
   }
