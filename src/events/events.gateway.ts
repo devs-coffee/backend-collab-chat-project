@@ -33,21 +33,31 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     this.logger.log('Events gateway started');
   }
   
-  //@SubscribeMessage('broadcastMessage')
-  handleMessage(channelId: string, message: MessageDto, serverId: string | null, users: {from: string, to: string} | null): void {
+  handleMessage(channelId: string, message: MessageDto, serverId: string | null, toUser: string | null): void {
     if(serverId) {
       this.server.to(`server_${serverId}`).emit(`message_${channelId}`, message);
     }
-    else {
-      //console.log("\u001b[1;33mPrivate Message :\n\u001b[1;0m", {...users, on_channel: channelId});
-      this.server.to(`user_${users!.to}`).emit(`privateMessage`, {message, channelId});
+    if(toUser) {
+      this.server.to(`user_${toUser}`).emit(`privateMessage`, message);
     }
   }
 
-  //@SubscribeMessage('broadcastUpdateMessage')
-  handleUpdateMessage(messageId: string, message: MessageDto, serverId: string | null, users: {from: string, to: string} | null): void {
-    //! cibler l'envoi d'events.
-    this.server.emit(`message_${messageId}`, message);
+  handleUpdateMessage(message: MessageDto, serverId: string | null, toUser: string | null): void {
+    if(serverId !== null) {
+      this.server.to(`server_${serverId}`).emit(`message_${message.channelId}`, message);
+    }
+    if(toUser) {
+      this.server.to(`user_${toUser}`).emit(`privateMessage`, message);
+    }
+  }
+
+  handleDeleteMessage(messageId: MessageDto, serverId: string |null, toUser: string | null): void {
+    if(serverId !== null) {
+      this.server.to(`server_${serverId}`).emit(`deleteMessage`, messageId);
+    }
+    else {
+      this.server.to(`user_${toUser}`).emit(`deleteMessage`, messageId);
+    }
   }
 
   @SubscribeMessage('getServerConnectedUsers')
@@ -93,7 +103,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       }    
     }
     //! control what happens when another client connects
-    console.log("\u001b[1;33m rooms : \u001b[1;0m\n", client.nsp.adapter.rooms); 
+    //console.log("\u001b[1;33m rooms : \u001b[1;0m\n", client.nsp.adapter.rooms); 
   }
 
   async handleJoinServer(user: UserDto, serverId:string) {

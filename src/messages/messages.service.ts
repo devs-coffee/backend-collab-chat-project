@@ -1,6 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ChannelService } from '../channels/channel.service';
 import { MessageDto } from '../dtos/messages/create-message.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -8,6 +8,7 @@ import { MessageCreateEntity } from './entities/message.create.entity';
 import { EventsGateway } from '../events/events.gateway';
 import { MessageEntity } from './entities/message.entity';
 import { CreateChannelEntity } from 'src/channels/entities/create.channel.entity';
+import { errorConstant } from 'src/constants/errors.constants';
 
 @Injectable()
 export class MessagesService {
@@ -43,18 +44,19 @@ export class MessagesService {
           ]
         })
       }
-
     }
     const channel = await this.prisma.channel.findUnique({where: {id: channelId}});
     if(channel && channel.serverId){
       await this.prisma.userServer.findFirstOrThrow({where : {AND: [{serverId: channel.serverId}, {userId: message.userId}]}});
       //TODO reformater l'erreur pour le front
     }
-    const created = await this.prisma.message.create({data : {...message, channelId}});
-    //* le from n'est pas forcément utile. on envoie l'event uniquement au destinataire ?
     const serverId = channel && channel.serverId ? channel.serverId : null;
-    const users = serverId === null ? {from: messageDto.userId, to: messageDto.toUserId!} : null;
-    this.eventsGateway.handleMessage(channelId, created, serverId, users);
+    const toUser = serverId === null ? messageDto.toUserId! : null;
+    if(serverId === null && toUser === null ) {
+      throw new BadRequestException(errorConstant.errorOccured);
+    }
+    const created = await this.prisma.message.create({data : {...message, channelId}});
+    this.eventsGateway.handleMessage(channelId, created, serverId, toUser);
     return await this.prisma.message.findFirst({where: {id: created.id}, include: { user: true }}) as MessageEntity;
   }
   
@@ -69,14 +71,42 @@ export class MessagesService {
   }
 
   async update(messageId: string, messageEntity: MessageCreateEntity) {
+    const messageToUpdate = await this.prisma.message.findFirst({where: { id: messageId}});
+    if(!messageToUpdate) {
+      throw new BadRequestException(errorConstant.itemNotExisting);
+    }
+    const server = await this.prisma.server.findFirst({where : {channels: {some: {id: messageToUpdate.channelId}}}});
+    let serverId: string | null = null;
+    let toUser: string | null = null;
+    if(server) {
+      serverId = server.id;
+    }
+    else { 
+      const privateChan = await this.prisma.channel.findFirst({where : {id: messageEntity.channelId}, include: {users: true}});
+      toUser = privateChan?.users.find(userChan => userChan.userId !== updated.userId)?.userId!;
+    };
+    if(serverId === null && toUser === null) {
+      throw new BadRequestException(errorConstant.errorOccured);
+    }
     const updated = await this.prisma.message.update({where: { id: messageId}, data: messageEntity});
-    this.eventsGateway.handleUpdateMessage(messageId, updated, null, null);
+    this.eventsGateway.handleUpdateMessage(updated, serverId, toUser);
     return updated;
   }
 
   async remove(messageId: string, userId: string) {
     const message = await this.prisma.message.findFirst({where: { id: messageId, userId : userId}});
     if(message){
+      const channel = await this.prisma.channel.findFirst({where: {id: message.channelId}, include: {users: true}});
+      let serverId: string | null = null;
+      let toUser: string | null = null;
+      if(channel?.serverId !== null) {
+        serverId = channel?.serverId!;
+      }
+      else {
+        let idList = channel.users.map(elt => elt.userId);
+        toUser = idList.find(elt => elt !== message.userId)!;
+      }
+      this.eventsGateway.handleDeleteMessage(message, serverId, toUser);
       await this.prisma.message.delete({where : { id : messageId}});
       return true;
     }

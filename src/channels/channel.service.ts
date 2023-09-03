@@ -1,8 +1,10 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
+import { ChannelDto } from 'src/dtos/channels/channel.dto';
 import { UserChannelDto } from 'src/dtos/userChannels/user-channel-dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
 import { UserChannelEntity } from './entities/userChannel.entity';
 import { UserPrivateChannelEntity } from './entities/userPrivateChannel.entity';
@@ -35,12 +37,16 @@ export class ChannelService {
   }
 
   async findPrivateChannelsByUserId(userId: string) {
-    const chans: UserPrivateChannelEntity[] = await this.prisma.channel.findMany({where: {AND: [{serverId: null}, {users: {some: {userId}}}]}, include: {users: {select: {user: {select: {id: true, pseudo: true, picture: true}}, lastRead: true}, where: {user: {isNot: {id: userId}}}}}});
+    const chans = await this.prisma.channel.findMany({where: {AND: [{serverId: null}, {users: {some: {userId}}}]}, include: {users: {where : {NOT : {userId: userId}}}}});
+    const channelsDto : ChannelDto[] = [];
+    
     for(let chan of chans) {
       const unread = await this.prisma.message.findFirst({where: {AND: [{channelId: chan.id}, {createdAt: {gte: chan.users[0].lastRead}}]}});
-      chan.hasNew = unread ? true : false;
+      const channelDto = this.mapper.map(chan, ChannelEntity, ChannelDto);
+      channelDto.hasNew = unread ? true : false;
+      channelsDto.push(channelDto);
     }
-    return chans;
+    return channelsDto;
   }
 
   async update(channelId: string, channelEntity: CreateChannelEntity) {

@@ -112,7 +112,6 @@ export class UsersController {
     try {
       const serviceResponse = await this.usersService.updatePrefs(req.user.id, prefsDto);
       if(serviceResponse) {
-        console.log(serviceResponse);
         response.isSucceed = true;
         response.result = serviceResponse;
       }
@@ -127,7 +126,6 @@ export class UsersController {
           this.logger.log(error.message.substring(error.message.indexOf('Unknown arg'), error.message.indexOf('for type UserPrefsUpdateInput') -1));
           throw new BadRequestException(error.message.substring(error.message.indexOf('Unknown arg'), error.message.indexOf('for type UserPrefsUpdateInput') -1));
         }
-
       }
       throw new BadRequestException(errorConstant.errorOccured);
     }
