@@ -13,17 +13,18 @@ enum ColorScheme {
 }
 
 model User {
-  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pseudo    String       @unique
-  password  String
-  email     String       @unique
-  picture   String?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  servers   UserServer[]
-  channels  UserChannel[]
-  messages  Message[]
-  prefs      UserPrefs?
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pseudo        String       @unique
+  password      String
+  email         String       @unique
+  picture       String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  servers       UserServer[]
+  channels      UserChannel[]
+  messages      Message[]
+  prefs         UserPrefs?
+  refreshToken  String?
 }
 
 model UserPrefs {

@@ -32,4 +32,7 @@ export class UserEntity implements User {
 
     @ApiProperty()
     prefs: UserPrefsEntity
+
+    @AutoMap()
+    refreshToken: string | null;
 }

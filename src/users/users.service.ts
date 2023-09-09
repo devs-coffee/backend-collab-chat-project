@@ -38,13 +38,9 @@ export class UsersService {
     return this.prisma.user.findFirst({ where: {email : signinUserDto.email }, include: {prefs: {select: {colorScheme: true}}}});
   }
 
-  async update(reqUserId: string, id: string, updateUserDto: UpdateUserDto) {
-    //control user rights
-    if(reqUserId !== id) {
-      throw new BadRequestException(errorConstant.noUserRightsOnUser);
-    }
+  async update(userId: string, updateUserDto: UpdateUserDto) {
     if(updateUserDto.password){
-      const user = await this.findOne(id);
+      const user = await this.findOne(userId);
       if(user && updateUserDto.oldPassword){
         const match = await bcrypt.compare(updateUserDto.oldPassword, user.password);
         if(match){
@@ -54,12 +50,11 @@ export class UsersService {
         }
       }
     }
-
-    const userEntity = this.mapper.map(updateUserDto, UpdateUserDto, UserEntity);
-    return this.prisma.user.update({
-      where: { id },
-      data: userEntity,
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateUserDto,
     });
+    return updated;
   }
 
   remove(reqUserId, id: string) {
