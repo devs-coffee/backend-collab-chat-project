@@ -2,7 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { errorConstant } from '../constants/errors.constants';
 import { OperationResult } from '../core/OperationResult';
 import { FullServerDto } from '../dtos/servers/fullServer.dto';

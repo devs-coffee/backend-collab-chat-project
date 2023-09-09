@@ -4,7 +4,7 @@ import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Put,
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
 import { PrefsDto } from 'src/dtos/users/prefs.dto';
-import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { errorConstant } from '../constants/errors.constants';
 import { OperationResult } from '../core/OperationResult';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
@@ -145,7 +145,10 @@ export class UsersController {
     const result = new OperationResult<UserDto | null>();
     result.isSucceed = false;
     try {
-      const updatedUser = await this.usersService.update(req.user.id, id, updateUserDto);
+      if(req.user.id !== id){
+        throw new BadRequestException(errorConstant.noUserRightsOnUser);
+      }
+      const updatedUser = await this.usersService.update(id, updateUserDto);
       if(updatedUser) {
         result.isSucceed = true;
         result.result = this.mapper.map(updatedUser, UserEntity, UserDto);
