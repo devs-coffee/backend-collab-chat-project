@@ -38,7 +38,7 @@ export class AuthenticationService {
   async signup(user : CreateUserDto): Promise<LoginSignupResponse | null> {
     const response = new LoginSignupResponse();
     if(user.password && user.password === user.passwordConfirm) {
-        user.password = await bcrypt.hash(user.password, this.saltRound)
+        user.password = await this.hashData(user.password)
     } else {
       throw new Error(errorConstant.passwordNotMatching)
     }
@@ -56,7 +56,7 @@ export class AuthenticationService {
   }
 
   async hashData(data: string) {
-    return await bcrypt.hash(data, 10);
+    return await bcrypt.hash(data, this.saltRound);
   }
 
   async updateRefreshToken(userId: string, refreshToken: string) {
