@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { SigninUserDto } from '../dtos/users/signin-user-dto';
 import { UpdateUserDto } from '../dtos/users/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -8,6 +8,7 @@ import { errorConstant } from '../constants/errors.constants';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { UserEntity } from './entities/user.entity';
+import { PrefsDto } from '../dtos/users/prefs.dto';
 
 @Injectable()
 export class UsersService {
@@ -17,28 +18,29 @@ export class UsersService {
     return this.prisma.user.create({ data: user});
   }
 
-  findAll(idList?: string) {
+  async findAll(idList?: string) {
     let idArray: string[] = [];
-      if(idList) {
-        idArray = idList.split(',');
-      }
+    if(idList) {
+      idArray = idList.split(',');
+    }
     if(idArray.length > 0) {
-      return this.prisma.user.findMany({ where: {id: {in: idArray}}});
+      const response = await this.prisma.user.findMany({ where: {id: {in: idArray}}});
+      return response;
     }
     return this.prisma.user.findMany();
   }
 
   findOne(id: string) {
-    return this.prisma.user.findUnique({ where: { id }});
+    return this.prisma.user.findUnique({ where: { id }, include: {prefs: {select: {colorScheme: true}}}});
   }
 
   findByEmail(signinUserDto: SigninUserDto) {
-    return this.prisma.user.findFirst({ where: {email : signinUserDto.email }});
+    return this.prisma.user.findFirst({ where: {email : signinUserDto.email }, include: {prefs: {select: {colorScheme: true}}}});
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(userId: string, updateUserDto: UpdateUserDto) {
     if(updateUserDto.password){
-      const user = await this.findOne(id);
+      const user = await this.findOne(userId);
       if(user && updateUserDto.oldPassword){
         const match = await bcrypt.compare(updateUserDto.oldPassword, user.password);
         if(match){
@@ -48,15 +50,18 @@ export class UsersService {
         }
       }
     }
-
-    const userEntity = this.mapper.map(updateUserDto, UpdateUserDto, UserEntity);
-    return this.prisma.user.update({
-      where: { id },
-      data: userEntity,
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateUserDto,
     });
+    return updated;
   }
 
-  remove(id: string) {
+  remove(reqUserId, id: string) {
+    //control user rights
+    if(reqUserId !== id) {
+      throw new BadRequestException(errorConstant.noUserRightsOnUser);
+    }
     return this.prisma.user.delete({ where: { id } });
   }
 
@@ -67,5 +72,13 @@ export class UsersService {
   async searchUser(name: string){
     const users = await this.prisma.user.findMany({ where : { pseudo : {contains: name.toLowerCase()}}, orderBy : { pseudo : 'asc'}});
     return users;
+  }
+
+  async updatePrefs(userId: string, prefs: PrefsDto) {
+    const oldPrefs = await this.prisma.userPrefs.findUnique({where: {userId}});
+    if(oldPrefs == null) {
+      return await this.prisma.userPrefs.create({data: {userId, ...prefs}});
+    }
+    return await this.prisma.userPrefs.update({where: {id: oldPrefs.id}, data: prefs});
   }
 }

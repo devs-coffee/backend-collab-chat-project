@@ -1,5 +1,5 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import { createMap, forMember, ignore, mapFrom, Mapper, MappingProfile, mapWith } from '@automapper/core';
+import { createMap, forMember, mapFrom, Mapper, MappingProfile, mapWith } from '@automapper/core';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/users/create-user.dto';
 import { UserEntity } from '../users/entities/user.entity';
@@ -26,6 +26,7 @@ import { UserServerDto } from '../dtos/userServers/user-servers-dto';
 import { UserServerEntity } from '../servers/entities/user-server-entity';
 import { FullServerDto } from '../dtos/servers/fullServer.dto';
 import { FullServerEntity } from '../servers/entities/fullServer.entity';
+import { AuthUserDto } from 'src/dtos/users/auth.user.dto';
 
 @Injectable()
 export class AutoMapping extends AutomapperProfile {
@@ -37,7 +38,8 @@ export class AutoMapping extends AutomapperProfile {
         return (mapper) => {
             //users
             createMap(mapper, CreateUserDto, UserEntity);
-            createMap(mapper, UserEntity, UserDto);
+            createMap(mapper, UserEntity, UserDto, forMember(user => user.prefs, mapFrom(u => u.prefs)));
+            createMap(mapper, UserEntity, AuthUserDto, forMember(u => u.refreshToken, mapFrom(u => u.refreshToken)));
             createMap(mapper, UserEntity, LoginSignupResponse);
             createMap(mapper, CreateUserDto, UserDto);
             createMap(mapper, UpdateUserDto, UserEntity);
@@ -67,15 +69,14 @@ export class AutoMapping extends AutomapperProfile {
             // channels
             createMap(mapper, ChannelEntity, ChannelDto, forMember(
                 (destination) => destination.users,
-                mapWith(UserChannelDto, UserPrivateChannelEntity, (source) => source.users))
+                mapFrom((source) => source.users.map(u => u.userId)))
             );
 
             createMap(mapper, UserChannelDto, UserChannelEntity);
 
-            createMap(mapper, UserPrivateChannelEntity, UserChannelDto, forMember(
-                (destination) => destination.user,
-                mapWith(UserDto, UserEntity, (source) => source.user))
-            );
+            
+
+
             createMap(mapper, ChannelDto, CreateChannelEntity);
             createMap(mapper, CreateChannelEntity, ChannelDto);
 

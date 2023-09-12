@@ -2,7 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { BadRequestException, Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
+import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
 import { errorConstant } from '../constants/errors.constants';
 import { OperationResult } from '../core/OperationResult';
 import { FullServerDto } from '../dtos/servers/fullServer.dto';
@@ -55,7 +55,7 @@ export class ServerController {
   @Get(":serverId/users")
   @ApiOkResponse({ type: UserDto, isArray: true })
   @ApiBadRequestResponse({type: BadRequestException })
-  async GetAllUserByServerId(@Request() req, @Param('serverId') serverId: string) : Promise<OperationResult<UserDto[]>> {
+  async GetAllUserByServerId(@Param('serverId') serverId: string) : Promise<OperationResult<UserDto[]>> {
     const response = new OperationResult<UserDto[]>();
     response.isSucceed = false;
     try {
@@ -123,7 +123,7 @@ export class ServerController {
   }
 
   /**
-   * Request to join or leave a server
+   ** Request to join or leave a server
    * @param joinRequest id of server to join or leave
    * @returns true if server is joined, false if left
    */
@@ -131,7 +131,7 @@ export class ServerController {
   @Post("join")
   @ApiCreatedResponse({ type: Boolean })
   @ApiBadRequestResponse({ type : BadRequestException })
-  async joinOrLeave(@Body() joinRequest: JoinServerRequestDto, @Request() req) : Promise<OperationResult<boolean>> {
+  async joinOrLeave(@Body() joinRequest: JoinServerRequestDto, @Request() req) : Promise<OperationResult<boolean>>/* return the FullServerDto ?*/ {
     const result = new OperationResult<boolean>();
     result.isSucceed = false;
     const dto = {
@@ -154,7 +154,7 @@ export class ServerController {
   }
 
   /**
-   * Get a server by id
+   ** Get a server by id
    * @param id id of server
    * @returns the server
    */
@@ -177,7 +177,7 @@ export class ServerController {
   }
 
   /**
-   * Update a server
+   ** Update a server
    * @param id id of server
    * @param updateServerDto data tu update server
    * @returns the new server's data
@@ -206,7 +206,7 @@ export class ServerController {
   }
 
   /**
-   * Delete a server by id
+   ** Delete a server by id
    * @param id id of server
    * @returns true if server is deleted, false otherwhise
    */

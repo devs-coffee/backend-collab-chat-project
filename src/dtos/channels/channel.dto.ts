@@ -17,5 +17,9 @@ export class ChannelDto {
 
     @AutoMap()
     @ApiProperty()
-    users?: UserChannelDto[]
+    users?: string[];
+
+    @AutoMap()
+    @ApiProperty()
+    hasNew: boolean;
 }

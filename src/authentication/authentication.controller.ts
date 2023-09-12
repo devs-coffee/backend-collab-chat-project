@@ -1,9 +1,9 @@
-import { Controller, Post, Body, BadRequestException, Logger, UseGuards, Request, Get } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, Logger, UseGuards, Request, Get, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
 import { AuthenticationService } from './authentication.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { LocalAuthGuard } from './local-auth.gard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.gard';
 import { CreateUserDto } from '../dtos/users/create-user.dto';
 import { errorConstant } from '../constants/errors.constants';
 import { InjectMapper } from '@automapper/nestjs';
@@ -12,6 +12,8 @@ import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 import { UserEntity } from '../users/entities/user.entity';
 import { UserDto } from '../dtos/users/user.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { TokensDto } from 'src/dtos/authentication/authentication.tokens.dto';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -32,6 +34,7 @@ export class AuthenticationController {
       return result;
     } catch (error) {
         Logger.log(error);
+        if(error instanceof BadRequestException) { throw error };
         throw new BadRequestException(errorConstant.errorOccured);
     }
   }
@@ -76,5 +79,28 @@ export class AuthenticationController {
       Logger.log(error);
       throw new BadRequestException(errorConstant.errorOccured);
     }
+  }
+
+  @UseGuards(JwtRefreshAuthGuard)
+  @ApiCreatedResponse({ type: TokensDto })
+  @ApiBadRequestResponse({ type : BadRequestException})
+  @Get('refresh')
+  async refreshTokens(@Request() req): Promise<OperationResult<TokensDto>> {
+    const result = new OperationResult<TokensDto>();
+    result.isSucceed = false;
+    try {
+      const userId = req.user.userId;
+      const refreshToken = req.user.refreshToken;
+      const tokens = await this.authenticationService.refreshTokens(userId, refreshToken);
+      result.isSucceed = true;
+      result.result = tokens;
+      return result;
+    } catch (error) {
+        Logger.log(error);
+        if(error instanceof ForbiddenException) {
+          throw new BadRequestException(error.message)
+        }
+        throw new BadRequestException(errorConstant.errorOccured);
+    }  
   }
 }

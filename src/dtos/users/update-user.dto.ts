@@ -1,22 +1,7 @@
-import { AutoMap } from "@automapper/classes";
-import { IsOptional, Matches  } from 'class-validator';
-import { Match } from "../../core/match.decorator";
+import { PartialType } from "@nestjs/swagger";
+import { CreateUserDto } from "./create-user.dto";
 
-export class UpdateUserDto implements IUser {
+export class UpdateUserDto extends PartialType(CreateUserDto) {
     oldPassword?: string;
-
-    @AutoMap()
-    pseudo?: string;
-
-    @AutoMap()
-    picture?: string;
-
-    @IsOptional()
-    @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'Mot de passe trop faible'})
-    @AutoMap()
-    password?: string;
-
-    @IsOptional()
-    @Match('password')
-    passwordConfirm?: string;
+    refreshToken?: string;
 }

@@ -1,22 +1,42 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import { EventsGateway } from '../events/events.gateway';
 import { errorConstant } from '../constants/errors.constants';
-import { FullServerDto } from '../dtos/servers/fullServer.dto';
 import { ServerDto } from '../dtos/servers/server.dto';
 import { UpdateServerDto } from '../dtos/servers/update-server.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { FullServerEntity } from './entities/fullServer.entity';
 import { ServerEntity } from './entities/server.entity';
 import { UserServerEntity } from './entities/user-server-entity';
+import { UserDto } from '../dtos/users/user.dto';
+import { UserEntity } from '../users/entities/user.entity';
+import { UserChannelDto } from 'src/dtos/userChannels/user-channel-dto';
 
 @Injectable()
 export class ServerService {
   constructor(private prisma: PrismaService, @InjectMapper() readonly mapper : Mapper)  {}
 
+  @Inject(forwardRef(() => EventsGateway))
+  private readonly eventsGateway: EventsGateway
+
   async create(server: ServerDto) {
     const serverEntity = this.mapper.map(server, ServerDto, ServerEntity);
-    const created = await this.prisma.server.create({ data: {...serverEntity, channels: {create: [{title: 'Général', users: {create: {userId: server.userId}}}]}, users: { create : [{userId: server.userId, isAdmin: true}]}}, include: { channels: {select: {id: true, title: true, serverId: true}} } }) as FullServerEntity;
+    const created = await this.prisma.server.create(
+      { 
+        data: {
+          ...serverEntity,
+          channels: {
+            create: [{title: 'Général', users: {create: {userId: server.userId}}}] //create general channel, and userChannel
+          },
+          users: {
+            create : [{userId: server.userId, isAdmin: true}] //create related userServer
+          }
+        }
+        , include: { // include channels in DB response entity to convert into FullServerEntity
+          channels: {select: {id: true, title: true, serverId: true}} 
+        }
+      }) as FullServerEntity;
     created.isCurrentUserAdmin = true;
     created.isCurrentUserMember = true;
     return created;
@@ -56,7 +76,7 @@ export class ServerService {
       updated.isCurrentUserMember = true;
       return updated;
     }
-    return new Error(errorConstant.noUserRights);
+    return new Error(errorConstant.noUserRightsOnServer);
   }
 
   async remove(id: string, userId: string) {
@@ -83,18 +103,42 @@ export class ServerService {
     return servers;
   }
 
-  async joinOrLeave(server: UserServerEntity) {
-    const hasAlreadyJoined = await this.prisma.userServer.findFirst({where : {AND : [{ serverId : server.serverId}, {userId : server.userId}]}});
+  async joinOrLeave(userServer: UserServerEntity) {
+    const hasAlreadyJoined = await this.prisma.userServer.findFirst({where : {AND : [{ serverId : userServer.serverId}, {userId : userServer.userId}]}});
+    const userEntity = await this.prisma.user.findUnique({where: {id: userServer.userId}});
+    const user = this.mapper.map(userEntity, UserEntity, UserDto);
+
+    //* user is member, si this is a leave request
     if(hasAlreadyJoined !== null){
-      const serverAdmins = await this.prisma.userServer.findMany({where: {AND : [{ serverId: server.serverId}, {isAdmin: true}]}});
-      if(serverAdmins.length < 2 && serverAdmins[0].userId === server.userId) {
+      const serverAdmins = await this.prisma.userServer.findMany({where: {AND : [{ serverId: userServer.serverId}, {isAdmin: true}]}});
+      if(serverAdmins.length < 2 && serverAdmins[0].userId === userServer.userId) {
         throw new BadRequestException(errorConstant.lastAdminCannotLeave);
       }
       await this.prisma.userServer.delete({ where : {id :hasAlreadyJoined.id}});
+      // delete userchannels
+      const serverChannels = (await this.prisma.channel.findMany({where: {serverId: hasAlreadyJoined.serverId}, select: {id: true}})).map(elt => elt.id) ;
+      await this.prisma.userChannel.deleteMany({where: {AND : [{userId: userServer.userId}, {channelId: {in : serverChannels}}]}});
+
+      this.eventsGateway.handleLeaveServer(user!, userServer.serverId);
       return false;
     }
-    const joinedServer = await this.prisma.userServer.create({data: server});
+
+    //* user is not member, so this is a join
+    const joinedServer = await this.prisma.userServer.create({data: userServer});
     if(joinedServer){
+      //! Create userChannel for every public channel of the server
+      const serverChans = await this.prisma.channel.findMany({where: {serverId: userServer.serverId}, select: {id: true}});
+      let data: UserChannelDto[] = [];
+      for(let chan of serverChans) {
+        data.push({
+          userId: userServer.userId,
+          channelId: chan.id
+        })
+      }
+      await this.prisma.userChannel.createMany({data});
+      
+      this.eventsGateway.handleJoinServer(user, userServer.serverId);
+      //? return FullServerEntity instead?
       return true;
     }
     return false;
