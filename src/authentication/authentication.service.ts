@@ -11,9 +11,9 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 import { UserDto } from '../dtos/users/user.dto';
 import { ServerService } from '../servers/server.service';
-import { TokensDto } from 'src/dtos/authentication/authentication.tokens.dto';
-import { jwtConstants } from 'src/constants/auth.constants';
-import { AuthUserDto } from 'src/dtos/users/auth.user.dto';
+import { TokensDto } from '../dtos/authentication/authentication.tokens.dto';
+import { jwtConstants } from '../constants/auth.constants';
+import { AuthUserDto } from '../dtos/users/auth.user.dto';
 
 @Injectable()
 export class AuthenticationService {

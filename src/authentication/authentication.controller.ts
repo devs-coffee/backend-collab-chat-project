@@ -12,7 +12,7 @@ import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 import { UserEntity } from '../users/entities/user.entity';
 import { UserDto } from '../dtos/users/user.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import { TokensDto } from 'src/dtos/authentication/authentication.tokens.dto';
+import { TokensDto } from '../dtos/authentication/authentication.tokens.dto';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh.guard';
 
 @Controller('auth')
