@@ -51,7 +51,7 @@ export class ChannelService {
   async update(channelId: string, channelEntity: CreateChannelEntity) {
     return await this.prisma.channel.update({where: { id: channelId}, data: channelEntity});
   }
-  
+
   async putAsRead(channelId: string, userId: string) {
     //! not implemented
     //TODO update lastRead field
