@@ -7,7 +7,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ChannelEntity } from './entities/channel.entity';
 import { CreateChannelEntity } from './entities/create.channel.entity';
 import { UserChannelEntity } from './entities/userChannel.entity';
-import { UserPrivateChannelEntity } from './entities/userPrivateChannel.entity';
 
 @Injectable()
 export class ChannelService {
@@ -52,6 +51,7 @@ export class ChannelService {
   async update(channelId: string, channelEntity: CreateChannelEntity) {
     return await this.prisma.channel.update({where: { id: channelId}, data: channelEntity});
   }
+
   async putAsRead(channelId: string, userId: string) {
     //! not implemented
     //TODO update lastRead field
