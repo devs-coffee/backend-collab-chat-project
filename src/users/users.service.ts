@@ -7,7 +7,6 @@ import * as bcrypt from 'bcryptjs';
 import { errorConstant } from '../constants/errors.constants';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { UserEntity } from './entities/user.entity';
 import { PrefsDto } from '../dtos/users/prefs.dto';
 
 @Injectable()
