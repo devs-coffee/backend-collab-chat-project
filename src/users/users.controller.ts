@@ -16,7 +16,6 @@ import { UsersService } from './users.service';
 @ApiTags('users')
 export class UsersController {
   private logger: Logger = new Logger('userController');
-
   
   constructor(private readonly usersService: UsersService, @InjectMapper() private readonly mapper: Mapper) {}
 
