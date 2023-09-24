@@ -26,7 +26,7 @@ import { UserServerDto } from '../dtos/userServers/user-servers-dto';
 import { UserServerEntity } from '../servers/entities/user-server-entity';
 import { FullServerDto } from '../dtos/servers/fullServer.dto';
 import { FullServerEntity } from '../servers/entities/fullServer.entity';
-import { AuthUserDto } from 'src/dtos/users/auth.user.dto';
+import { AuthUserDto } from '../dtos/users/auth.user.dto';
 
 @Injectable()
 export class AutoMapping extends AutomapperProfile {

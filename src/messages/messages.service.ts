@@ -7,8 +7,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MessageCreateEntity } from './entities/message.create.entity';
 import { EventsGateway } from '../events/events.gateway';
 import { MessageEntity } from './entities/message.entity';
-import { CreateChannelEntity } from 'src/channels/entities/create.channel.entity';
-import { errorConstant } from 'src/constants/errors.constants';
+import { CreateChannelEntity } from '../channels/entities/create.channel.entity';
+import { errorConstant } from '../constants/errors.constants';
 
 @Injectable()
 export class MessagesService {

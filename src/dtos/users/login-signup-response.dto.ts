@@ -6,7 +6,7 @@ import { AuthUserDto } from './auth.user.dto';
 export class LoginSignupResponse {
     @AutoMap()
     @ApiProperty()
-    user: AuthUserDto
+    user: UserDto
 
     @ApiProperty()
     access_token: string;

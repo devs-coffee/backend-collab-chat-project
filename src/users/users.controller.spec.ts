@@ -71,7 +71,8 @@ const USERSENTITY: User[] = [
     password: 'Test1234!',
     email: 'testjbo@test.com',
     createdAt: new Date(Date.now()),
-    updatedAt: new Date(Date.now())
+    updatedAt: new Date(Date.now()),
+    refreshToken: "token"
   },
   {
     id: '85bc066f-5edb-4efd-b86c-bc50c7554135',
@@ -80,6 +81,7 @@ const USERSENTITY: User[] = [
     password: 'Test1234!',
     email: 'testjbo1@test.com',
     createdAt: new Date(Date.now()),
-    updatedAt: new Date(Date.now())
+    updatedAt: new Date(Date.now()),
+    refreshToken: "token"
   }
 ];

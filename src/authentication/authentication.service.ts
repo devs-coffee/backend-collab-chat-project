@@ -11,9 +11,9 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 import { UserDto } from '../dtos/users/user.dto';
 import { ServerService } from '../servers/server.service';
-import { TokensDto } from 'src/dtos/authentication/authentication.tokens.dto';
-import { jwtConstants } from 'src/constants/auth.constants';
-import { AuthUserDto } from 'src/dtos/users/auth.user.dto';
+import { TokensDto } from '../dtos/authentication/authentication.tokens.dto';
+import { jwtConstants } from '../constants/auth.constants';
+import { AuthUserDto } from '../dtos/users/auth.user.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -21,21 +21,20 @@ export class AuthenticationService {
 
   constructor(private readonly usersService: UsersService, private readonly jwtService: JwtService, @InjectMapper() private readonly classMapper: Mapper, private readonly serverService: ServerService) {}
 
-  async signin(signinUser : SigninUserDto): Promise<LoginSignupResponse | null> {
+  async signin(signinUser : SigninUserDto): Promise<{user: LoginSignupResponse, refreshToken: string} | null> {
     const response = new LoginSignupResponse();
     const user = await this.usersService.findByEmail(signinUser);
     if (user && await bcrypt.compare(signinUser.password, user.password)) {
         const tokens = await this.getTokens(user.id, user.pseudo);
         await this.updateRefreshToken(user.id, tokens.refreshToken);
         response.access_token = tokens.access_token;
-        user.refreshToken = tokens.refreshToken;
-        response.user = this.classMapper.map(user, UserEntity, AuthUserDto);
-        return response;
+        response.user = this.classMapper.map(user, UserEntity, UserDto);
+        return { user: response, refreshToken: tokens.refreshToken};
     }
     return null;
   }
 
-  async signup(user : CreateUserDto): Promise<LoginSignupResponse | null> {
+  async signup(user : CreateUserDto): Promise<{user: LoginSignupResponse, refreshToken: string} | null> {
     const response = new LoginSignupResponse();
     if(user.password && user.password === user.passwordConfirm) {
         user.password = await this.hashData(user.password)
@@ -50,7 +49,7 @@ export class AuthenticationService {
       response.access_token = tokens.access_token;
       createdUser.refreshToken = tokens.refreshToken;
       response.user = this.classMapper.map(createdUser, UserEntity, AuthUserDto);
-      return response;
+      return { user: response, refreshToken: tokens.refreshToken};
     }
     return null;
   }

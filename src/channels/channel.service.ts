@@ -1,7 +1,7 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
-import { ChannelDto } from 'src/dtos/channels/channel.dto';
+import { ChannelDto } from '../dtos/channels/channel.dto';
 import { UserChannelDto } from 'src/dtos/userChannels/user-channel-dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChannelEntity } from './entities/channel.entity';

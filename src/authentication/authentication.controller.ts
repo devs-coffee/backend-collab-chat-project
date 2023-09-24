@@ -1,4 +1,4 @@
-import { Controller, Post, Body, BadRequestException, Logger, UseGuards, Request, Get, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, Logger, UseGuards, Request, Get, ForbiddenException, Response } from '@nestjs/common';
 import { ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 import { OperationResult } from '../core/OperationResult';
 import { AuthenticationService } from './authentication.service';
@@ -12,7 +12,7 @@ import { LoginSignupResponse } from '../dtos/users/login-signup-response.dto';
 import { UserEntity } from '../users/entities/user.entity';
 import { UserDto } from '../dtos/users/user.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import { TokensDto } from 'src/dtos/authentication/authentication.tokens.dto';
+import { TokensDto } from '../dtos/authentication/authentication.tokens.dto';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh.guard';
 
 @Controller('auth')
@@ -24,13 +24,17 @@ export class AuthenticationController {
   @Post('login')
   @ApiOkResponse({ type: LoginSignupResponse })
   @ApiBadRequestResponse({ type : BadRequestException })
-  async login(@Request() req) : Promise<OperationResult<LoginSignupResponse>> {
+  async login(@Request() req, @Response({ passthrough: true }) res) : Promise<OperationResult<LoginSignupResponse>> {
     const result = new OperationResult<LoginSignupResponse>();
     result.isSucceed = false;
     try {
       result.isSucceed = true;
-      const response = req.user;
-      result.result = response as LoginSignupResponse;
+      const userSignedIn = await this.authenticationService.signin(req.user);
+      if(userSignedIn) {
+        res.cookie('refreshToken', userSignedIn.refreshToken, { httpOnly: true });
+        result.result = userSignedIn.user;
+      }
+
       return result;
     } catch (error) {
         Logger.log(error);
@@ -42,14 +46,14 @@ export class AuthenticationController {
   @Post('signup')
   @ApiCreatedResponse({ type: LoginSignupResponse })
   @ApiBadRequestResponse({ type : BadRequestException})
-  async signup(@Body() user: CreateUserDto) : Promise<OperationResult<LoginSignupResponse>> {
+  async signup(@Body() user: CreateUserDto, @Response({passthrough: true}) res) : Promise<OperationResult<LoginSignupResponse>> {
     const result = new OperationResult<LoginSignupResponse>();
     result.isSucceed = false;
     try {
       const createdUser = await this.authenticationService.signup(user);
       if(createdUser) {
-        result.isSucceed = true;
-        result.result = createdUser;
+        res.cookie('refreshToken', createdUser.refreshToken, { httpOnly: true });
+        result.result = createdUser.user;
       } else {
         throw new Error(errorConstant.userDoesNotExist);
       }
@@ -85,15 +89,15 @@ export class AuthenticationController {
   @ApiCreatedResponse({ type: TokensDto })
   @ApiBadRequestResponse({ type : BadRequestException})
   @Get('refresh')
-  async refreshTokens(@Request() req): Promise<OperationResult<TokensDto>> {
-    const result = new OperationResult<TokensDto>();
+  async refreshTokens(@Request() req, @Response({ passthrough: true }) res): Promise<OperationResult<string>> {
+    const result = new OperationResult<string>();
     result.isSucceed = false;
     try {
       const userId = req.user.userId;
-      const refreshToken = req.user.refreshToken;
-      const tokens = await this.authenticationService.refreshTokens(userId, refreshToken);
+      const tokens = await this.authenticationService.refreshTokens(userId, req.cookies['refreshToken']);
       result.isSucceed = true;
-      result.result = tokens;
+      res.cookie('refreshToken', tokens.refreshToken);
+      result.result = tokens.access_token;
       return result;
     } catch (error) {
         Logger.log(error);
